@@ -10,7 +10,11 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(npx shadcn@latest init:*)",
-      "Bash(npx shadcn@latest add:*)"
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx tsc:*)",
+      "Bash(python -m venv:*)",
+      "Bash(where:*)",
+      "Bash(py:*)"
     ]
   }
 }

@@ -18,7 +18,7 @@ import Link from "next/link";
 const highlights = [
   { icon: FileSearch, label: "문제 자동 추출" },
   { icon: Sparkles, label: "AI 변형문제" },
-  { icon: Lightbulb, label: "단계별 힌트" },
+  { icon: Lightbulb, label: "AI  튜터" },
 ];
 
 const features = [

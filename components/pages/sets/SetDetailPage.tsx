@@ -2,17 +2,16 @@
 
 import * as React from "react";
 import {
-  ArrowRight,
   BookOpen,
   ChevronRight,
   FileText,
   Image as ImageIcon,
-  Lightbulb,
   Sparkles,
   Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { SolvePanel } from "@/components/pages/sets/solve/SolvePanel";
 
 /* ------------------------------------------------------------------ */
 /*  Placeholder data                                                   */
@@ -172,67 +171,6 @@ function VariantsTab({ selected }: { selected: number }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tab: 풀기                                                          */
-/* ------------------------------------------------------------------ */
-
-function SolveTab({ selected }: { selected: number }) {
-  const q = questions.find((q) => q.id === selected) ?? questions[0];
-
-  return (
-    <div className="flex flex-col gap-6 max-w-3xl">
-      {/* Question */}
-      <div className="border-2 p-6">
-        <h3 className="font-mono font-bold mb-3">{q.title}</h3>
-        <p className="font-mono leading-relaxed">{q.text}</p>
-      </div>
-
-      {/* Answer input */}
-      <div className="border-2 p-6 flex flex-col gap-4">
-        <p className="font-mono text-sm font-bold">답안 입력</p>
-        <textarea
-          placeholder="답안을 입력하세요..."
-          rows={3}
-          className="w-full border-2 rounded-none px-4 py-3 font-mono text-sm placeholder:text-muted-foreground focus:outline-none focus:border-[#FF6B2C] transition-colors resize-none"
-        />
-        <Button
-          size="lg"
-          className="cursor-pointer rounded-none self-start bg-[#FF6B2C] hover:bg-[#FF6B2C]/90 font-mono text-base px-8 py-6"
-        >
-          제출하기
-          <ArrowRight className="ml-2 w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Hints */}
-      <div className="border-2 p-6 flex flex-col gap-4">
-        <p className="font-mono text-sm font-bold">AI 힌트</p>
-        <div className="flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            className="cursor-pointer rounded-none font-mono"
-          >
-            <Lightbulb className="mr-1.5 h-4 w-4" />
-            힌트 1 (약한 힌트)
-          </Button>
-          <Button
-            variant="outline"
-            className="cursor-pointer rounded-none font-mono"
-          >
-            <Lightbulb className="mr-1.5 h-4 w-4" />
-            힌트 2 (강한 힌트)
-          </Button>
-        </div>
-        <div className="h-20 rounded bg-muted flex items-center justify-center">
-          <span className="font-mono text-sm text-muted-foreground">
-            힌트를 요청하면 여기에 표시됩니다
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /*  Main page                                                          */
 /* ------------------------------------------------------------------ */
 
@@ -286,7 +224,14 @@ export function SetDetailPage({ setId }: { setId: string }) {
           <QuestionsTab selected={selectedQ} onSelect={setSelectedQ} />
         )}
         {activeTab === "variants" && <VariantsTab selected={selectedQ} />}
-        {activeTab === "solve" && <SolveTab selected={selectedQ} />}
+        {activeTab === "solve" && (
+          <SolvePanel
+            key={selectedQ}
+            question={
+              questions.find((q) => q.id === selectedQ) ?? questions[0]
+            }
+          />
+        )}
       </main>
     </div>
   );
