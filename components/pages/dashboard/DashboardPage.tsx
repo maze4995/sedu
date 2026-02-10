@@ -62,12 +62,20 @@ export function DashboardPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("http://localhost:8000/uploads", {
-        method: "POST",
-        body: formData,
-      });
+      let res: Response;
+      try {
+        res = await fetch("http://localhost:8000/v1/sets", {
+          method: "POST",
+          body: formData,
+        });
+      } catch {
+        throw new Error("서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.");
+      }
 
-      if (!res.ok) throw new Error(`서버 오류 (${res.status})`);
+      if (res.status >= 500) throw new Error("서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      if (res.status === 413) throw new Error("파일 크기가 서버 제한을 초과합니다.");
+      if (res.status === 422) throw new Error("지원하지 않는 파일 형식입니다.");
+      if (!res.ok) throw new Error(`업로드 실패 (오류 코드: ${res.status})`);
 
       const data = await res.json();
       router.push(`/sets/${data.setId}`);
@@ -75,7 +83,7 @@ export function DashboardPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "업로드에 실패했습니다. 서버 연결을 확인해주세요.",
+          : "알 수 없는 오류가 발생했습니다.",
       );
       setUploading(false);
     }

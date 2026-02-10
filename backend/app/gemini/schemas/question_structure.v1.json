@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "question_structure.v1.json",
+  "title": "QuestionStructureV1",
+  "description": "Structured output for a single extracted question. All text MUST come from OCR tokens — never invented.",
+  "type": "object",
+  "required": [
+    "question_id",
+    "question_format",
+    "stem",
+    "materials",
+    "choices",
+    "asset_links",
+    "review",
+    "clean_text_preview"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "question_id": {
+      "type": "string",
+      "description": "Public question ID (q_<ULID>)."
+    },
+    "question_format": {
+      "type": "string",
+      "enum": [
+        "multiple_choice",
+        "short_answer",
+        "descriptive",
+        "true_false",
+        "matching",
+        "unknown"
+      ]
+    },
+    "stem": {
+      "type": "string",
+      "description": "Main question text assembled from OCR tokens."
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "passage",
+              "table_caption",
+              "figure_caption",
+              "data",
+              "condition",
+              "other"
+            ]
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "choices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Choice label, e.g. '1', '2', 'ㄱ', 'ㄴ'."
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "asset_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["asset_id", "asset_type", "attach_to", "rationale"],
+        "additionalProperties": false,
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "asset_type": {
+            "type": "string",
+            "enum": ["image", "diagram", "table", "graph", "equation", "other"]
+          },
+          "attach_to": {
+            "type": "string",
+            "enum": ["stem", "materials", "choices"]
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Brief reason why this asset is linked here."
+          }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["needs_review", "flags", "evidence_summary"],
+      "additionalProperties": false,
+      "properties": {
+        "needs_review": {
+          "type": "boolean"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "low_ocr_confidence",
+              "ambiguous_structure",
+              "missing_choices",
+              "missing_stem",
+              "overlapping_bbox",
+              "unresolved_asset",
+              "other"
+            ]
+          }
+        },
+        "evidence_summary": {
+          "type": "string",
+          "description": "Brief summary of OCR evidence quality."
+        }
+      }
+    },
+    "clean_text_preview": {
+      "type": "string",
+      "description": "Human-readable plain-text preview of the full question."
+    }
+  }
+}

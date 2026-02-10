@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "segmentation_qc.v1.json",
+  "title": "SegmentationQCV1",
+  "description": "Quality-check output for a single question segmentation crop.",
+  "type": "object",
+  "required": [
+    "question_id",
+    "is_complete",
+    "issues",
+    "confidence"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "question_id": {
+      "type": "string",
+      "description": "Public question ID (q_<ULID>)."
+    },
+    "is_complete": {
+      "type": "boolean",
+      "description": "True if the crop captures the entire question without merging."
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "merged_with_next",
+          "missing_top",
+          "missing_bottom",
+          "missing_left",
+          "missing_right",
+          "unclear_numbering",
+          "other"
+        ]
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "suggested_bbox_adjustment": {
+      "type": "object",
+      "required": ["dx", "dy", "dw", "dh"],
+      "additionalProperties": false,
+      "properties": {
+        "dx": { "type": "number" },
+        "dy": { "type": "number" },
+        "dw": { "type": "number" },
+        "dh": { "type": "number" }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

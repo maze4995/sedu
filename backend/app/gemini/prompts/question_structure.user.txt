@@ -1,0 +1,27 @@
+Structure the following question into the QuestionStructureV1 JSON schema.
+
+Context:
+- Set ID: {{setId}}
+- Question ID: {{questionId}}
+- Page number: {{pageNo}}
+- Question bounding box (x, y, w, h): {{questionBBox}}
+
+OCR tokens within the question region (each token has text, bbox [x,y,w,h], and confidence):
+{{ocrTokensJson}}
+
+Detected assets (images, diagrams, tables, graphs) near or within this question:
+{{assetsJson}}
+
+Nearby tokens outside the question bbox for context (do NOT use these as question content, only for disambiguation):
+{{nearbyTokensJson}}
+
+Instructions:
+1. Identify the question format (multiple_choice, short_answer, descriptive, true_false, matching, or unknown).
+2. Extract the stem text from OCR tokens.
+3. Extract any material passages, captions, data, or conditions into the materials array.
+4. Extract choices (if any) with their labels and text.
+5. Link relevant assets using their asset_id values.
+6. Set review flags if any OCR token confidence is below 0.7 or if structure is ambiguous.
+7. Produce a clean_text_preview that concatenates the readable question text.
+
+Return ONLY the JSON object. No explanation.

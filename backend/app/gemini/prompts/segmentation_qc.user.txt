@@ -1,0 +1,25 @@
+Check the segmentation quality of the following cropped question region.
+
+Context:
+- Set ID: {{setId}}
+- Question ID: {{questionId}}
+- Page number: {{pageNo}}
+- Question bounding box (x, y, w, h): {{questionBBox}}
+
+OCR tokens within the question bounding box:
+{{ocrTokensJson}}
+
+Detected assets within or overlapping the question bounding box:
+{{assetsJson}}
+
+Nearby tokens just outside the question bbox (use these to detect if the crop cuts off content or merges with adjacent questions):
+{{nearbyTokensJson}}
+
+Instructions:
+1. Check if the crop contains exactly one complete question (not merged with the next/previous question).
+2. Check if any part of the question is cut off (top, bottom, left, right).
+3. Check if numbering is clear and unambiguous.
+4. If the bbox needs adjustment, provide suggested_bbox_adjustment as pixel deltas (dx, dy, dw, dh).
+5. Set confidence based on OCR evidence quality and bbox alignment.
+
+Return ONLY the JSON object. No explanation.
