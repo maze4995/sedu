@@ -83,6 +83,41 @@ MVP 테스트용 가짜 추출 파이프라인이 내장되어 있습니다.
 4. `GET /v1/extraction-jobs/{jobId}` 로 진행 상태 폴링
 5. 완료 후 `GET /v1/sets/{setId}/questions` 로 생성된 문제 조회
 
+## Google Cloud Vision OCR
+
+문제 크롭 이미지에서 텍스트를 추출하기 위해 Cloud Vision `DOCUMENT_TEXT_DETECTION`을 사용합니다.
+
+### 1. Vision API 활성화
+
+1. [Google Cloud Console](https://console.cloud.google.com/) → API 및 서비스 → Cloud Vision API 활성화
+2. 서비스 계정 생성 → JSON 키 다운로드
+
+### 2. 인증 설정
+
+PowerShell:
+
+```powershell
+$env:GOOGLE_APPLICATION_CREDENTIALS="C:\path\to\service-account.json"
+```
+
+bash/zsh:
+
+```bash
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service-account.json"
+```
+
+### 3. 파이프라인 구조
+
+```
+업로드 이미지 → 문제 크롭 → Vision OCR (word별 bbox + confidence) → DB 저장
+                                                                  ↓
+                                                        Gemini 구조화 (추후)
+```
+
+- `app/ocr/vision_client.py` — Vision API 호출 및 응답 정규화
+- `app/pipeline/ocr_step.py` — 문제 단위 OCR 실행 및 DB 반영
+- OCR 결과는 `questions.ocr_text`, `questions.structure.ocr_tokens`, `questions.metadata.ocr_avg_confidence`에 저장
+
 ## Database
 
 Schema lives in `migrations/schema.sql` (PostgreSQL 15+).
