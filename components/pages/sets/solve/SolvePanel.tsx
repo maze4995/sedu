@@ -36,11 +36,14 @@ interface ChatMsg {
 }
 
 export interface SolvePanelQuestion {
+  questionId: string;
+  setId: string;
   id: number;
   title: string;
   text: string;
   unit: string;
   difficulty: string;
+  imageUrl?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -194,6 +197,7 @@ export function SolvePanel({ question }: { question: SolvePanelQuestion }) {
     },
   ]);
   const [input, setInput] = React.useState("");
+  const [sending, setSending] = React.useState(false);
 
   React.useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -204,18 +208,41 @@ export function SolvePanel({ question }: { question: SolvePanelQuestion }) {
     scratchCanvasRef.current?.clear();
   };
 
-  const send = () => {
+  const send = async () => {
     const trimmed = input.trim();
     if (!trimmed) return;
-    setMessages((prev) => [
-      ...prev,
-      { role: "user", text: trimmed },
-      {
-        role: "ai",
-        text: "필기 내용을 분석하고 있어요... (AI 연동 전 플레이스홀더)",
-      },
-    ]);
+    if (!question.questionId) {
+      setMessages((prev) => [...prev, { role: "user", text: trimmed }, { role: "ai", text: "문항이 선택되지 않았습니다." }]);
+      setInput("");
+      return;
+    }
+    setSending(true);
+    const nextMessages = [...messages, { role: "user" as const, text: trimmed }];
+    setMessages(nextMessages);
     setInput("");
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}/v1/questions/${question.questionId}/hint`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            level: "weak",
+            recentChat: nextMessages.map((m) => ({ role: m.role, text: m.text })),
+            strokeSummary: "",
+          }),
+        },
+      );
+      if (!res.ok) throw new Error(`힌트 생성 실패 (${res.status})`);
+      const data = (await res.json()) as { hint: string };
+      setMessages((prev) => [...prev, { role: "ai", text: data.hint || "힌트를 생성하지 못했습니다." }]);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "힌트 생성에 실패했습니다.";
+      setMessages((prev) => [...prev, { role: "ai", text: msg }]);
+    } finally {
+      setSending(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -325,11 +352,16 @@ export function SolvePanel({ question }: { question: SolvePanelQuestion }) {
           {/* Problem area */}
           <div className="relative">
             <div className="p-6 flex flex-col gap-4">
-              {/* Problem image placeholder */}
-              <div className="border-2 border-dashed rounded-lg p-10 flex flex-col items-center gap-2 text-muted-foreground">
-                <ImageIcon className="h-10 w-10" />
-                <span className="font-mono text-sm">문제 이미지 영역</span>
-              </div>
+              {question.imageUrl ? (
+                <div className="border-2 rounded-lg p-2 bg-white">
+                  <img src={question.imageUrl} alt={`${question.title} problem`} className="w-full h-auto rounded" />
+                </div>
+              ) : (
+                <div className="border-2 border-dashed rounded-lg p-10 flex flex-col items-center gap-2 text-muted-foreground">
+                  <ImageIcon className="h-10 w-10" />
+                  <span className="font-mono text-sm">문제 이미지 영역</span>
+                </div>
+              )}
               {/* Problem text */}
               <p className="font-mono text-sm leading-relaxed">
                 {question.text}
@@ -419,9 +451,10 @@ export function SolvePanel({ question }: { question: SolvePanelQuestion }) {
           />
           <Button
             onClick={send}
+            disabled={sending}
             className="cursor-pointer rounded-none bg-[#FF6B2C] hover:bg-[#FF6B2C]/90 px-4 min-h-[44px]"
           >
-            <Send className="h-4 w-4" />
+            {sending ? <span className="font-mono text-xs">...</span> : <Send className="h-4 w-4" />}
           </Button>
         </div>
       </div>

@@ -1,0 +1,15 @@
+{
+  "requiredPaths": [
+    "/healthz",
+    "/v2/documents",
+    "/v2/jobs/{jobId}",
+    "/v2/jobs/{jobId}/events",
+    "/v2/sets",
+    "/v2/sets/{setId}",
+    "/v2/sets/{setId}/questions",
+    "/v2/questions/{questionId}",
+    "/v2/questions/{questionId}/reprocess",
+    "/v2/review/queue",
+    "/v2/questions/{questionId}/review"
+  ]
+}

@@ -14,17 +14,28 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createDocument, listSets } from "@/lib/api/v2";
 
-const placeholderSets = [
-  { id: "set-1", title: "통합과학 1단원 모의고사", status: "완료" as const },
-  { id: "set-2", title: "통합과학 에너지 단원", status: "추출중" as const },
-  { id: "set-3", title: "2025 3월 모의고사", status: "실패" as const },
-];
+type SetSummary = {
+  setId: string;
+  status: string;
+  title?: string | null;
+  questionCount: number;
+  sourceFilename?: string | null;
+};
+
+type SetListResponse = {
+  sets: SetSummary[];
+  limit: number;
+  offset: number;
+};
 
 const statusConfig = {
-  완료: { icon: CheckCircle2, className: "bg-green-100 text-green-700" },
-  추출중: { icon: Loader2, className: "bg-yellow-100 text-yellow-700" },
-  실패: { icon: XCircle, className: "bg-red-100 text-red-700" },
+  ready: { icon: CheckCircle2, className: "bg-green-100 text-green-700", label: "완료" },
+  extracting: { icon: Loader2, className: "bg-yellow-100 text-yellow-700", label: "추출중" },
+  error: { icon: XCircle, className: "bg-red-100 text-red-700", label: "실패" },
+  needs_review: { icon: XCircle, className: "bg-orange-100 text-orange-700", label: "검토필요" },
+  created: { icon: Loader2, className: "bg-slate-100 text-slate-700", label: "생성됨" },
 };
 
 const ACCEPTED = ".pdf,.png,.jpg,.jpeg";
@@ -37,6 +48,18 @@ export function DashboardPage() {
   const [file, setFile] = React.useState<File | null>(null);
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [mySets, setMySets] = React.useState<SetSummary[]>([]);
+
+  const fetchRecentSets = React.useCallback(async () => {
+    const data = (await listSets({ limit: 5, offset: 0 })) as SetListResponse;
+    setMySets(data.sets || []);
+  }, []);
+
+  React.useEffect(() => {
+    fetchRecentSets().catch(() => {
+      // Keep dashboard usable even if set list fails.
+    });
+  }, [fetchRecentSets]);
 
   const handleFileChange = (picked: File | undefined) => {
     setError(null);
@@ -59,25 +82,10 @@ export function DashboardPage() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      let res: Response;
-      try {
-        res = await fetch("http://localhost:8000/v1/sets", {
-          method: "POST",
-          body: formData,
-        });
-      } catch {
-        throw new Error("서버에 연결할 수 없습니다. 백엔드가 실행 중인지 확인해주세요.");
-      }
-
-      if (res.status >= 500) throw new Error("서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-      if (res.status === 413) throw new Error("파일 크기가 서버 제한을 초과합니다.");
-      if (res.status === 422) throw new Error("지원하지 않는 파일 형식입니다.");
-      if (!res.ok) throw new Error(`업로드 실패 (오류 코드: ${res.status})`);
-
-      const data = await res.json();
+      const data = await createDocument(file);
+      fetchRecentSets().catch(() => {
+        // no-op
+      });
       router.push(`/sets/${data.setId}`);
     } catch (err) {
       setError(
@@ -183,13 +191,17 @@ export function DashboardPage() {
             </p>
 
             <div className="flex flex-col gap-3">
-              {placeholderSets.map((set) => {
-                const config = statusConfig[set.status];
+              {mySets.map((set) => {
+                const config = statusConfig[set.status as keyof typeof statusConfig] || {
+                  icon: FileText,
+                  className: "bg-slate-100 text-slate-700",
+                  label: set.status,
+                };
                 const StatusIcon = config.icon;
 
                 return (
                   <div
-                    key={set.id}
+                    key={set.setId}
                     className="border p-4 flex items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -198,13 +210,13 @@ export function DashboardPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-mono font-medium text-sm truncate">
-                          {set.title}
+                          {set.title || set.sourceFilename || set.setId}
                         </p>
                         <span
                           className={`inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-xs font-mono ${config.className}`}
                         >
                           <StatusIcon className="h-3 w-3" />
-                          {set.status}
+                          {config.label}
                         </span>
                       </div>
                     </div>
@@ -215,7 +227,7 @@ export function DashboardPage() {
                       size="sm"
                       className="cursor-pointer rounded-none font-mono shrink-0"
                     >
-                      <Link href={`/sets/${set.id}`}>
+                      <Link href={`/sets/${set.setId}`}>
                         열기
                         <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
                       </Link>
@@ -223,6 +235,11 @@ export function DashboardPage() {
                   </div>
                 );
               })}
+              {mySets.length === 0 && (
+                <div className="border p-4 font-mono text-sm text-muted-foreground">
+                  표시할 세트가 없습니다.
+                </div>
+              )}
             </div>
           </section>
         </div>

@@ -9,7 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+/.claude/
 # testing
 /coverage
 
@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!backend/.env.example
 
 # vercel
 .vercel
@@ -41,7 +42,14 @@ yarn-error.log*
 next-env.d.ts
 
 # python
+.venv/
+/.venv/
+backend/.venv/
+**/.venv/
 backend/venv/
 __pycache__/
 *.pyc
 *.db
+backend/uploads/
+backend/debug/
+backend/credentials/

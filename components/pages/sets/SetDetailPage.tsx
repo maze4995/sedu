@@ -6,54 +6,15 @@ import {
   ChevronRight,
   FileText,
   Image as ImageIcon,
+  Loader2,
   Sparkles,
   Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SolvePanel } from "@/components/pages/sets/solve/SolvePanel";
-
-/* ------------------------------------------------------------------ */
-/*  Placeholder data                                                   */
-/* ------------------------------------------------------------------ */
-
-const questions = [
-  {
-    id: 1,
-    title: "문제 1",
-    text: "다음 중 물질의 상태 변화에 대한 설명으로 옳은 것은?",
-    unit: "물질과 규칙성",
-    difficulty: "중",
-  },
-  {
-    id: 2,
-    title: "문제 2",
-    text: "그림은 지구 시스템의 에너지 흐름을 나타낸 것이다. A와 B에 해당하는 에너지원을 서술하시오.",
-    unit: "시스템과 상호작용",
-    difficulty: "상",
-  },
-  {
-    id: 3,
-    title: "문제 3",
-    text: "산화·환원 반응의 예로 적절한 것을 <보기>에서 모두 고르시오.",
-    unit: "변화와 다양성",
-    difficulty: "중",
-  },
-  {
-    id: 4,
-    title: "문제 4",
-    text: "생태계에서 물질의 순환과 에너지 흐름의 차이점을 설명하시오.",
-    unit: "환경과 에너지",
-    difficulty: "하",
-  },
-  {
-    id: 5,
-    title: "문제 5",
-    text: "그래프는 시간에 따른 방사성 원소의 붕괴 곡선이다. 반감기를 구하시오.",
-    unit: "물질과 규칙성",
-    difficulty: "상",
-  },
-];
+import { API_BASE } from "@/lib/api/client";
+import { getQuestion, getSet, listQuestionsForSet, reprocessQuestion } from "@/lib/api/v2";
 
 const tabs = [
   { id: "questions", label: "문제", icon: FileText },
@@ -63,59 +24,209 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-/* ------------------------------------------------------------------ */
-/*  Tab: 문제                                                          */
-/* ------------------------------------------------------------------ */
+type SetStatus = "created" | "extracting" | "ready" | "needs_review" | "error" | string;
+
+type SetDetailResponse = {
+  setId: string;
+  status: SetStatus;
+  title?: string | null;
+  sourceFilename?: string | null;
+  sourceMime?: string | null;
+  sourceSize?: number | null;
+  questionCount: number;
+};
+
+type QuestionSummary = {
+  questionId: string;
+  numberLabel?: string | null;
+  orderIndex: number;
+  reviewStatus: string;
+  croppedImageUrl?: string | null;
+};
+
+type QuestionListResponse = {
+  setId: string;
+  questions: QuestionSummary[];
+};
+
+type QuestionDetailResponse = {
+  questionId: string;
+  setId: string;
+  numberLabel?: string | null;
+  orderIndex: number;
+  croppedImageUrl?: string | null;
+  ocrText?: string | null;
+  structure: Record<string, unknown>;
+  metadata: Record<string, unknown>;
+  confidence?: number | null;
+  reviewStatus: string;
+};
+
+type VariantRow = {
+  variantId: string;
+  variantType: string;
+  body: string;
+  answer?: string | null;
+  explanation?: string | null;
+  model?: string | null;
+  createdAt: string;
+};
+
+type VariantListResponse = {
+  questionId: string;
+  variants: VariantRow[];
+};
+
+const statusLabelMap: Record<string, string> = {
+  created: "생성됨",
+  extracting: "추출중",
+  ready: "완료",
+  needs_review: "검토필요",
+  error: "실패",
+};
+
+const statusClassMap: Record<string, string> = {
+  created: "bg-slate-100 text-slate-700",
+  extracting: "bg-yellow-100 text-yellow-800",
+  ready: "bg-green-100 text-green-800",
+  needs_review: "bg-orange-100 text-orange-800",
+  error: "bg-red-100 text-red-800",
+};
+
+function formatStatus(status: string) {
+  return statusLabelMap[status] ?? status;
+}
+
+function statusClass(status: string) {
+  return statusClassMap[status] ?? "bg-muted text-muted-foreground";
+}
+
+function getUnit(metadata: Record<string, unknown> | null | undefined): string {
+  if (!metadata) return "-";
+  const unitPath = metadata["unitPath"];
+  if (Array.isArray(unitPath)) {
+    return unitPath.map((v) => String(v)).join(" > ");
+  }
+  const unit = metadata["unit"];
+  if (typeof unit === "string" && unit.trim()) return unit;
+  return "-";
+}
+
+function getDifficulty(metadata: Record<string, unknown> | null | undefined): string {
+  if (!metadata) return "-";
+  const difficulty = metadata["difficulty"];
+  if (typeof difficulty === "string" && difficulty.trim()) return difficulty;
+  return "-";
+}
+
+function questionTitle(q: QuestionSummary | QuestionDetailResponse | null): string {
+  if (!q) return "문제";
+  return q.numberLabel ? `문제 ${q.numberLabel}` : `문제 ${q.orderIndex}`;
+}
+
+function resolveApiUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  return `${API_BASE}${path}`;
+}
 
 function QuestionsTab({
-  selected,
+  questions,
+  selectedQId,
   onSelect,
+  selectedDetail,
+  onReprocess,
+  reprocessing,
 }: {
-  selected: number;
-  onSelect: (id: number) => void;
+  questions: QuestionSummary[];
+  selectedQId: string | null;
+  onSelect: (id: string) => void;
+  selectedDetail: QuestionDetailResponse | null;
+  onReprocess: () => Promise<void>;
+  reprocessing: boolean;
 }) {
-  const q = questions.find((q) => q.id === selected) ?? questions[0];
+  const unit = getUnit(selectedDetail?.metadata);
+  const difficulty = getDifficulty(selectedDetail?.metadata);
+  const imageUrl = resolveApiUrl(selectedDetail?.croppedImageUrl);
 
   return (
     <div className="grid md:grid-cols-[280px_1fr] gap-6">
-      {/* Left list */}
       <div className="border-2 divide-y">
-        {questions.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onSelect(item.id)}
-            className={`w-full text-left px-4 py-3 font-mono text-sm flex items-center justify-between transition-colors cursor-pointer ${
-              item.id === selected
-                ? "bg-[#FF6B2C]/10 text-[#FF6B2C] font-bold"
-                : "hover:bg-muted"
-            }`}
-          >
-            {item.title}
-            <ChevronRight className="h-4 w-4 shrink-0" />
-          </button>
-        ))}
+        {questions.length === 0 && (
+          <div className="px-4 py-6 font-mono text-sm text-muted-foreground">
+            문제를 추출 중입니다.
+          </div>
+        )}
+        {questions.map((item) => {
+          const selected = item.questionId === selectedQId;
+          return (
+            <button
+              key={item.questionId}
+              onClick={() => onSelect(item.questionId)}
+              className={`w-full text-left px-4 py-3 font-mono text-sm flex items-center justify-between transition-colors cursor-pointer ${
+                selected
+                  ? "bg-[#FF6B2C]/10 text-[#FF6B2C] font-bold"
+                  : "hover:bg-muted"
+              }`}
+            >
+              <span className="truncate">{questionTitle(item)}</span>
+              <ChevronRight className="h-4 w-4 shrink-0" />
+            </button>
+          );
+        })}
       </div>
 
-      {/* Right detail */}
       <div className="border-2 p-6 flex flex-col gap-6">
-        <h3 className="font-mono text-xl font-bold">{q.title}</h3>
-
-        <p className="font-mono leading-relaxed">{q.text}</p>
-
-        {/* Image placeholder */}
-        <div className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center gap-2 text-muted-foreground">
-          <ImageIcon className="h-10 w-10" />
-          <span className="font-mono text-sm">이미지 영역</span>
+        <div className="flex items-center justify-between gap-4">
+          <h3 className="font-mono text-xl font-bold">{questionTitle(selectedDetail)}</h3>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!selectedDetail || reprocessing}
+            onClick={() => {
+              onReprocess().catch(() => {
+                // handled by page-level error state
+              });
+            }}
+            className="font-mono rounded-none cursor-pointer"
+          >
+            {reprocessing ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                재처리 중
+              </>
+            ) : (
+              "문항 재처리"
+            )}
+          </Button>
         </div>
 
-        {/* Metadata */}
+        <p className="font-mono leading-relaxed whitespace-pre-wrap">
+          {selectedDetail?.ocrText?.trim() || "OCR 결과가 아직 없습니다."}
+        </p>
+
+        {imageUrl ? (
+          <div className="border-2 rounded-lg p-2 bg-white">
+            <img
+              src={imageUrl}
+              alt={`${questionTitle(selectedDetail)} crop`}
+              className="w-full h-auto rounded"
+            />
+          </div>
+        ) : (
+          <div className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center gap-2 text-muted-foreground">
+            <ImageIcon className="h-10 w-10" />
+            <span className="font-mono text-sm">CROP 이미지가 아직 없습니다</span>
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-3">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted font-mono text-xs">
             <Tag className="h-3 w-3" />
-            단원: {q.unit}
+            단원: {unit}
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted font-mono text-xs">
-            난이도: {q.difficulty}
+            난이도: {difficulty}
           </span>
         </div>
       </div>
@@ -123,60 +234,232 @@ function QuestionsTab({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Tab: 변형                                                          */
-/* ------------------------------------------------------------------ */
-
-function VariantsTab({ selected }: { selected: number }) {
-  const q = questions.find((q) => q.id === selected) ?? questions[0];
-
+function VariantsTab({
+  selectedDetail,
+  variants,
+  loading,
+  error,
+  onGenerate,
+}: {
+  selectedDetail: QuestionDetailResponse | null;
+  variants: VariantRow[];
+  loading: boolean;
+  error: string | null;
+  onGenerate: () => Promise<void>;
+}) {
+  const first = variants[0];
   return (
     <div className="flex flex-col gap-6 max-w-3xl">
-      {/* Original question */}
       <div className="border-2 p-6">
         <p className="font-mono text-xs text-muted-foreground mb-2">원본 문제</p>
-        <h3 className="font-mono font-bold mb-2">{q.title}</h3>
-        <p className="font-mono text-sm leading-relaxed">{q.text}</p>
+        <h3 className="font-mono font-bold mb-2">{questionTitle(selectedDetail)}</h3>
+        <p className="font-mono text-sm leading-relaxed whitespace-pre-wrap">
+          {selectedDetail?.ocrText?.trim() || "OCR 결과가 아직 없습니다."}
+        </p>
       </div>
 
       <Button
         size="lg"
+        disabled={!selectedDetail || loading}
+        onClick={() => {
+          onGenerate().catch(() => {
+            // handled by page-level error display
+          });
+        }}
         className="cursor-pointer rounded-none self-start bg-[#FF6B2C] hover:bg-[#FF6B2C]/90 font-mono text-base px-8 py-6"
       >
-        <Sparkles className="mr-2 h-5 w-5" />
-        변형문제 생성
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            생성 중...
+          </>
+        ) : (
+          <>
+            <Sparkles className="mr-2 h-5 w-5" />
+            변형문제 생성
+          </>
+        )}
       </Button>
 
-      {/* Generated variant placeholder */}
       <div className="border-2 border-dashed p-6 flex flex-col gap-4">
         <p className="font-mono text-xs text-muted-foreground">생성된 변형문제</p>
-        <div className="h-16 rounded bg-muted flex items-center justify-center">
-          <span className="font-mono text-sm text-muted-foreground">
-            변형문제가 여기에 표시됩니다
-          </span>
+        {error && <p className="font-mono text-sm text-destructive">{error}</p>}
+
+        <div className="rounded bg-muted p-4">
+          <p className="font-mono text-sm whitespace-pre-wrap">
+            {first?.body || "변형문제가 여기에 표시됩니다"}
+          </p>
         </div>
 
         <p className="font-mono text-xs text-muted-foreground mt-2">정답</p>
-        <div className="h-10 rounded bg-muted flex items-center justify-center">
-          <span className="font-mono text-sm text-muted-foreground">—</span>
+        <div className="rounded bg-muted p-3">
+          <span className="font-mono text-sm text-muted-foreground">
+            {first?.answer || "—"}
+          </span>
         </div>
 
         <p className="font-mono text-xs text-muted-foreground mt-2">해설</p>
-        <div className="h-20 rounded bg-muted flex items-center justify-center">
-          <span className="font-mono text-sm text-muted-foreground">—</span>
+        <div className="rounded bg-muted p-3">
+          <span className="font-mono text-sm text-muted-foreground whitespace-pre-wrap">
+            {first?.explanation || "—"}
+          </span>
         </div>
       </div>
     </div>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Main page                                                          */
-/* ------------------------------------------------------------------ */
-
 export function SetDetailPage({ setId }: { setId: string }) {
   const [activeTab, setActiveTab] = React.useState<TabId>("questions");
-  const [selectedQ, setSelectedQ] = React.useState(1);
+  const [setInfo, setSetInfo] = React.useState<SetDetailResponse | null>(null);
+  const [questions, setQuestions] = React.useState<QuestionSummary[]>([]);
+  const [selectedQId, setSelectedQId] = React.useState<string | null>(null);
+  const [selectedDetail, setSelectedDetail] = React.useState<QuestionDetailResponse | null>(null);
+  const [variantRows, setVariantRows] = React.useState<VariantRow[]>([]);
+  const [variantLoading, setVariantLoading] = React.useState(false);
+  const [variantError, setVariantError] = React.useState<string | null>(null);
+  const [reprocessing, setReprocessing] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const fetchSetAndQuestions = React.useCallback(async () => {
+    const [setData, listData] = await Promise.all([
+      getSet(setId) as Promise<SetDetailResponse>,
+      listQuestionsForSet(setId) as Promise<QuestionListResponse>,
+    ]);
+
+    setSetInfo(setData);
+    setQuestions(listData.questions || []);
+
+    if (!selectedQId && listData.questions?.length) {
+      setSelectedQId(listData.questions[0].questionId);
+    } else if (
+      selectedQId &&
+      !listData.questions.some((q) => q.questionId === selectedQId)
+    ) {
+      setSelectedQId(listData.questions[0]?.questionId ?? null);
+    }
+  }, [setId, selectedQId]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        setError(null);
+        await fetchSetAndQuestions();
+      } catch (e) {
+        if (!cancelled) {
+          setError(e instanceof Error ? e.message : "데이터를 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchSetAndQuestions]);
+
+  React.useEffect(() => {
+    if (!setInfo || !["created", "extracting"].includes(setInfo.status)) return;
+
+    const timer = window.setInterval(() => {
+      fetchSetAndQuestions().catch(() => {
+        // keep previous UI state on transient polling failure
+      });
+    }, 2000);
+
+    return () => window.clearInterval(timer);
+  }, [setInfo, fetchSetAndQuestions]);
+
+  React.useEffect(() => {
+    if (!selectedQId) {
+      setSelectedDetail(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = (await getQuestion(selectedQId)) as QuestionDetailResponse;
+        if (!cancelled) setSelectedDetail(data);
+      } catch {
+        if (!cancelled) setSelectedDetail(null);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedQId]);
+
+  const fetchVariants = React.useCallback(async (questionId: string) => {
+    const res = await fetch(`${API_BASE}/v1/questions/${questionId}/variants`);
+    if (!res.ok) throw new Error(`변형문제 조회 실패 (${res.status})`);
+    const data = (await res.json()) as VariantListResponse;
+    setVariantRows(data.variants || []);
+  }, []);
+
+  React.useEffect(() => {
+    if (!selectedQId) {
+      setVariantRows([]);
+      return;
+    }
+    fetchVariants(selectedQId).catch(() => {
+      setVariantRows([]);
+    });
+  }, [selectedQId, fetchVariants]);
+
+  const generateVariant = React.useCallback(async () => {
+    if (!selectedQId) return;
+    setVariantLoading(true);
+    setVariantError(null);
+    try {
+      const res = await fetch(`${API_BASE}/v1/questions/${selectedQId}/variants`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ variantType: "paraphrase" }),
+      });
+      if (!res.ok) throw new Error(`변형문제 생성 실패 (${res.status})`);
+      await fetchVariants(selectedQId);
+    } catch (e) {
+      setVariantError(e instanceof Error ? e.message : "변형문제 생성 실패");
+    } finally {
+      setVariantLoading(false);
+    }
+  }, [selectedQId, fetchVariants]);
+
+  const reprocessCurrentQuestion = React.useCallback(async () => {
+    if (!selectedQId) return;
+    setReprocessing(true);
+    setError(null);
+    try {
+      await reprocessQuestion(selectedQId);
+      await fetchSetAndQuestions();
+      const detail = (await getQuestion(selectedQId)) as QuestionDetailResponse;
+      setSelectedDetail(detail);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "문항 재처리에 실패했습니다.");
+    } finally {
+      setReprocessing(false);
+    }
+  }, [selectedQId, fetchSetAndQuestions]);
+
+  const solveQuestion = React.useMemo(() => {
+    return {
+      questionId: selectedDetail?.questionId ?? "",
+      setId: selectedDetail?.setId ?? setId,
+      id: selectedDetail?.orderIndex ?? 1,
+      title: questionTitle(selectedDetail),
+      text: selectedDetail?.ocrText?.trim() || "문제 텍스트를 불러오는 중입니다.",
+      unit: getUnit(selectedDetail?.metadata),
+      difficulty: getDifficulty(selectedDetail?.metadata),
+      imageUrl: resolveApiUrl(selectedDetail?.croppedImageUrl),
+    };
+  }, [selectedDetail, setId]);
 
   return (
     <div className="container mx-auto px-4 min-h-screen bg-background">
@@ -196,41 +479,70 @@ export function SetDetailPage({ setId }: { setId: string }) {
           <span className="font-mono text-sm text-muted-foreground px-3 py-1 rounded-full bg-muted">
             {setId}
           </span>
+          {setInfo && (
+            <span
+              className={`font-mono text-xs px-2.5 py-1 rounded-full ${statusClass(setInfo.status)}`}
+            >
+              {formatStatus(setInfo.status)} · {setInfo.questionCount}문항
+            </span>
+          )}
+          {setInfo?.status === "extracting" && (
+            <span className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              추출 진행 중 (2초 간격 자동 새로고침)
+            </span>
+          )}
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b-2 mb-8">
-          {tabs.map((tab) => {
-            const Icon = tab.icon;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-6 py-3 font-mono text-sm font-medium transition-colors cursor-pointer -mb-[2px] ${
-                  activeTab === tab.id
-                    ? "border-b-2 border-[#FF6B2C] text-[#FF6B2C]"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Tab content */}
-        {activeTab === "questions" && (
-          <QuestionsTab selected={selectedQ} onSelect={setSelectedQ} />
+        {error && (
+          <p className="font-mono text-sm text-destructive mb-6">{error}</p>
         )}
-        {activeTab === "variants" && <VariantsTab selected={selectedQ} />}
-        {activeTab === "solve" && (
-          <SolvePanel
-            key={selectedQ}
-            question={
-              questions.find((q) => q.id === selectedQ) ?? questions[0]
-            }
-          />
+
+        {loading ? (
+          <div className="font-mono text-sm text-muted-foreground">불러오는 중...</div>
+        ) : (
+          <>
+            <div className="flex border-b-2 mb-8">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-6 py-3 font-mono text-sm font-medium transition-colors cursor-pointer -mb-[2px] ${
+                      activeTab === tab.id
+                        ? "border-b-2 border-[#FF6B2C] text-[#FF6B2C]"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeTab === "questions" && (
+              <QuestionsTab
+                questions={questions}
+                selectedQId={selectedQId}
+                onSelect={setSelectedQId}
+                selectedDetail={selectedDetail}
+                onReprocess={reprocessCurrentQuestion}
+                reprocessing={reprocessing}
+              />
+            )}
+            {activeTab === "variants" && (
+              <VariantsTab
+                selectedDetail={selectedDetail}
+                variants={variantRows}
+                loading={variantLoading}
+                error={variantError}
+                onGenerate={generateVariant}
+              />
+            )}
+            {activeTab === "solve" && <SolvePanel key={selectedQId ?? "empty"} question={solveQuestion} />}
+          </>
         )}
       </main>
     </div>
