@@ -3,8 +3,10 @@ from __future__ import annotations
 import time
 from typing import Any, Protocol
 
+from app.infra.ports.llm import LLMPort
 from app.infra.ports.ocr import OCRPort
 from app.infra.ports.storage import StoragePort
+from app.workers.extraction import DocumentExtractionPipeline, QuestionCropper
 
 _ALLOWED_MIME_PREFIXES = (
     "application/pdf",
@@ -79,9 +81,31 @@ class DocumentApplicationService:
 
 
 class DocumentProcessingService:
-    def __init__(self, *, store: DocumentJobStorePort, ocr: OCRPort, stage_delay_ms: int = 0):
+    def __init__(
+        self,
+        *,
+        store: DocumentJobStorePort,
+        ocr: OCRPort,
+        storage: StoragePort,
+        llm: LLMPort | None = None,
+        stage_delay_ms: int = 0,
+        ocr_lang: str = "kor+eng",
+        extraction_llm_enabled: bool = True,
+        extraction_llm_model: str | None = None,
+        extraction_mode: str = "hybrid",
+    ):
         self.store = store
         self.ocr = ocr
+        self.storage = storage
+        self.pipeline = DocumentExtractionPipeline(
+            ocr_fallback=ocr,
+            ocr_lang=ocr_lang,
+            llm=llm,
+            llm_enabled=extraction_llm_enabled,
+            llm_model=extraction_llm_model,
+            extraction_mode=extraction_mode,
+        )
+        self.cropper = QuestionCropper(storage=storage, ocr_lang=ocr_lang, secondary_ocr=ocr)
         self.stage_delay_seconds = max(0.0, stage_delay_ms / 1000.0)
 
     def _delay(self) -> None:
@@ -92,57 +116,107 @@ class DocumentProcessingService:
         self,
         *,
         job_id: str,
+        set_id: str,
         filename: str | None,
         content_type: str | None,
         payload: bytes,
     ) -> None:
+        gemini_mode = self.pipeline.extraction_mode == "gemini_full"
+
         if not self.store.mark_job_running(job_id=job_id, stage="preprocess", percent=15.0):
             return
         self._delay()
 
-        if not self.store.mark_job_running(job_id=job_id, stage="layout", percent=45.0):
-            return
-        self._delay()
-
-        if not self.store.mark_job_running(job_id=job_id, stage="ocr", percent=75.0):
-            return
-        self._delay()
+        if gemini_mode:
+            if not self.store.mark_job_running(job_id=job_id, stage="gemini_page_extract", percent=60.0):
+                return
+            self._delay()
+        else:
+            if not self.store.mark_job_running(job_id=job_id, stage="layout", percent=45.0):
+                return
+            self._delay()
+            if not self.store.mark_job_running(job_id=job_id, stage="ocr", percent=75.0):
+                return
+            self._delay()
 
         try:
-            ocr_payload = self.ocr.extract(payload)
-            ocr_text = str(ocr_payload.get("text") or "").strip() or "[mock] OCR text"
-            confidence = float(ocr_payload.get("confidence") or 0.0)
+            result = self.pipeline.extract(
+                payload=payload,
+                content_type=content_type,
+                filename=filename,
+            )
 
-            review_status = "auto_ok" if confidence >= 0.9 else "auto_flagged"
-            set_status = "ready" if review_status == "auto_ok" else "needs_review"
+            if not self.store.mark_job_running(
+                job_id=job_id,
+                stage="merge" if gemini_mode else "split",
+                percent=82.0 if gemini_mode else 90.0,
+            ):
+                return
+            self._delay()
 
-            question = {
-                "number_label": "1",
-                "order_index": 1,
-                "review_status": review_status,
-                "confidence": confidence,
-                "ocr_text": ocr_text,
-                "metadata": {
-                    "subject": "unknown",
-                    "unit": "unknown",
-                    "difficulty": "unknown",
-                    "source": "uploaded",
-                    "sourceMime": content_type,
-                    "sourceFilename": filename,
-                },
-                "structure": {
-                    "parsed_v1": {
-                        "stem": ocr_text,
-                        "tokens": ocr_payload.get("tokens", []),
+            questions: list[dict[str, Any]] = []
+            for item in result.questions:
+                review_status = "auto_ok" if item.confidence >= 0.9 else "auto_flagged"
+                metadata = dict(item.metadata)
+                metadata["sourceMime"] = content_type
+                metadata["sourceFilename"] = filename
+                metadata["pipelineVersion"] = "phaseA-gemini-pages-1" if gemini_mode else "phaseA-mvp-1"
+                metadata["averageConfidence"] = round(result.average_confidence, 4)
+
+                questions.append(
+                    {
+                        "number_label": item.number_label,
+                        "order_index": item.order_index,
+                        "review_status": review_status,
+                        "confidence": item.confidence,
+                        "ocr_text": item.text,
+                        "metadata": metadata,
+                        "structure": item.structure,
                     }
-                },
-            }
+                )
+
+            if not self.store.mark_job_running(job_id=job_id, stage="crop", percent=92.0):
+                return
+            self._delay()
+
+            crop_traces = self.cropper.create_and_store_with_trace(
+                set_id=set_id,
+                payload=payload,
+                content_type=content_type,
+                filename=filename,
+                question_count=len(questions),
+                question_labels=[str(item.get("number_label") or "") for item in questions],
+                question_crop_hints=[
+                    ((item.get("metadata") or {}).get("cropHint") if isinstance(item.get("metadata"), dict) else None)
+                    for item in questions
+                ],
+            )
+            for idx, trace in enumerate(crop_traces):
+                if idx >= len(questions):
+                    continue
+                metadata = dict(questions[idx].get("metadata") or {})
+                url = trace.get("url")
+                if url:
+                    metadata["croppedImageUrl"] = url
+                crop_source = trace.get("cropSource")
+                if crop_source:
+                    metadata["cropSource"] = crop_source
+                page_index = trace.get("pageIndex")
+                if page_index and not metadata.get("pageIndex"):
+                    metadata["pageIndex"] = page_index
+                questions[idx]["metadata"] = metadata
+
+            set_status = (
+                "ready"
+                if questions and all(q["review_status"] == "auto_ok" for q in questions)
+                else "needs_review"
+            )
             self.store.complete_job(
                 job_id=job_id,
                 stage="completed",
                 percent=100.0,
                 set_status=set_status,
-                questions=[question],
+                questions=questions,
             )
         except Exception as exc:  # pragma: no cover
             self.store.fail_job(job_id=job_id, error_message=str(exc)[:400])

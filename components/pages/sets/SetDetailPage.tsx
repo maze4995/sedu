@@ -4,17 +4,35 @@ import * as React from "react";
 import {
   BookOpen,
   ChevronRight,
+  Clock3,
   FileText,
   Image as ImageIcon,
   Loader2,
   Sparkles,
   Tag,
 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SolvePanel } from "@/components/pages/sets/solve/SolvePanel";
 import { API_BASE } from "@/lib/api/client";
-import { getQuestion, getSet, listQuestionsForSet, reprocessQuestion } from "@/lib/api/v2";
+import {
+  createQuestionVariant,
+  getJob,
+  getJobEvents,
+  getQuestion,
+  getSet,
+  listQuestionVariants,
+  listQuestionsForSet,
+  reprocessQuestion,
+  type JobDetailResponse,
+  type JobEventItem,
+  type QuestionDetailResponse,
+  type QuestionListResponse,
+  type QuestionSummary,
+  type SetDetailResponse,
+  type VariantItem,
+} from "@/lib/api/v2";
 
 const tabs = [
   { id: "questions", label: "문제", icon: FileText },
@@ -23,59 +41,8 @@ const tabs = [
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
-
-type SetStatus = "created" | "extracting" | "ready" | "needs_review" | "error" | string;
-
-type SetDetailResponse = {
-  setId: string;
-  status: SetStatus;
-  title?: string | null;
-  sourceFilename?: string | null;
-  sourceMime?: string | null;
-  sourceSize?: number | null;
-  questionCount: number;
-};
-
-type QuestionSummary = {
-  questionId: string;
-  numberLabel?: string | null;
-  orderIndex: number;
-  reviewStatus: string;
-  croppedImageUrl?: string | null;
-};
-
-type QuestionListResponse = {
-  setId: string;
-  questions: QuestionSummary[];
-};
-
-type QuestionDetailResponse = {
-  questionId: string;
-  setId: string;
-  numberLabel?: string | null;
-  orderIndex: number;
-  croppedImageUrl?: string | null;
-  ocrText?: string | null;
-  structure: Record<string, unknown>;
-  metadata: Record<string, unknown>;
-  confidence?: number | null;
-  reviewStatus: string;
-};
-
-type VariantRow = {
-  variantId: string;
-  variantType: string;
-  body: string;
-  answer?: string | null;
-  explanation?: string | null;
-  model?: string | null;
-  createdAt: string;
-};
-
-type VariantListResponse = {
-  questionId: string;
-  variants: VariantRow[];
-};
+type ViewQuestionSummary = QuestionSummary & { croppedImageUrl?: string | null };
+type ViewQuestionDetail = QuestionDetailResponse & { croppedImageUrl?: string | null };
 
 const statusLabelMap: Record<string, string> = {
   created: "생성됨",
@@ -101,6 +68,32 @@ function statusClass(status: string) {
   return statusClassMap[status] ?? "bg-muted text-muted-foreground";
 }
 
+const jobStatusClassMap: Record<string, string> = {
+  queued: "bg-slate-100 text-slate-700",
+  running: "bg-blue-100 text-blue-700",
+  done: "bg-green-100 text-green-700",
+  failed: "bg-red-100 text-red-700",
+};
+
+const stageClassMap: Record<string, string> = {
+  queued: "bg-slate-100 text-slate-700",
+  preprocess: "bg-amber-100 text-amber-700",
+  layout: "bg-indigo-100 text-indigo-700",
+  ocr: "bg-cyan-100 text-cyan-700",
+  split: "bg-teal-100 text-teal-700",
+  completed: "bg-green-100 text-green-700",
+  error: "bg-red-100 text-red-700",
+};
+
+function jobStatusClass(status: string) {
+  return jobStatusClassMap[status] ?? "bg-muted text-muted-foreground";
+}
+
+function stageClass(stage: string | null | undefined) {
+  if (!stage) return "bg-muted text-muted-foreground";
+  return stageClassMap[stage] ?? "bg-muted text-muted-foreground";
+}
+
 function getUnit(metadata: Record<string, unknown> | null | undefined): string {
   if (!metadata) return "-";
   const unitPath = metadata["unitPath"];
@@ -119,7 +112,7 @@ function getDifficulty(metadata: Record<string, unknown> | null | undefined): st
   return "-";
 }
 
-function questionTitle(q: QuestionSummary | QuestionDetailResponse | null): string {
+function questionTitle(q: { numberLabel?: string | null; orderIndex: number } | null): string {
   if (!q) return "문제";
   return q.numberLabel ? `문제 ${q.numberLabel}` : `문제 ${q.orderIndex}`;
 }
@@ -130,6 +123,76 @@ function resolveApiUrl(path: string | null | undefined): string | null {
   return `${API_BASE}${path}`;
 }
 
+function formatEventTime(value: string): string {
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return value;
+  return dt.toLocaleTimeString("ko-KR", { hour12: false });
+}
+
+function JobTimelineCard({
+  jobId,
+  job,
+  events,
+  error,
+}: {
+  jobId: string | null;
+  job: JobDetailResponse | null;
+  events: JobEventItem[];
+  error: string | null;
+}) {
+  if (!jobId) {
+    return null;
+  }
+
+  return (
+    <section className="mb-8 border-2 p-4 sm:p-5 bg-muted/20">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <Clock3 className="h-4 w-4" />
+        <h2 className="font-mono text-sm font-bold">추출 작업 타임라인</h2>
+        <span className="font-mono text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+          {jobId}
+        </span>
+      </div>
+
+      {error && <p className="font-mono text-xs text-destructive mb-2">{error}</p>}
+
+      {job ? (
+        <div className="mb-3 flex flex-wrap gap-2 font-mono text-xs">
+          <span className={`px-2 py-1 rounded ${jobStatusClass(job.status)}`}>{job.status}</span>
+          <span className={`px-2 py-1 rounded ${stageClass(job.stage)}`}>stage: {job.stage ?? "-"}</span>
+          <span className="px-2 py-1 rounded bg-muted">progress: {Math.round(job.percent)}%</span>
+        </div>
+      ) : (
+        <p className="font-mono text-xs text-muted-foreground mb-3">Job 상태를 확인하는 중...</p>
+      )}
+
+      <div className="border rounded-sm bg-background">
+        {events.length === 0 ? (
+          <p className="font-mono text-xs text-muted-foreground px-3 py-2">이벤트가 아직 없습니다.</p>
+        ) : (
+          <ul className="divide-y">
+            {events.slice(-8).reverse().map((event, index) => (
+              <li
+                key={`${event.createdAt}-${index}`}
+                className="grid grid-cols-[72px_88px_1fr_64px] gap-2 px-3 py-2 font-mono text-xs"
+              >
+                <span className="text-muted-foreground">{formatEventTime(event.createdAt)}</span>
+                <span className={`inline-flex items-center px-2 py-0.5 rounded ${jobStatusClass(event.status)}`}>
+                  {event.status}
+                </span>
+                <span className={`truncate inline-flex items-center px-2 py-0.5 rounded ${stageClass(event.stage)}`}>
+                  {event.stage ?? "-"}
+                </span>
+                <span className="text-right">{Math.round(event.percent)}%</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function QuestionsTab({
   questions,
   selectedQId,
@@ -138,10 +201,10 @@ function QuestionsTab({
   onReprocess,
   reprocessing,
 }: {
-  questions: QuestionSummary[];
+  questions: ViewQuestionSummary[];
   selectedQId: string | null;
   onSelect: (id: string) => void;
-  selectedDetail: QuestionDetailResponse | null;
+  selectedDetail: ViewQuestionDetail | null;
   onReprocess: () => Promise<void>;
   reprocessing: boolean;
 }) {
@@ -241,8 +304,8 @@ function VariantsTab({
   error,
   onGenerate,
 }: {
-  selectedDetail: QuestionDetailResponse | null;
-  variants: VariantRow[];
+  selectedDetail: ViewQuestionDetail | null;
+  variants: VariantItem[];
   loading: boolean;
   error: string | null;
   onGenerate: () => Promise<void>;
@@ -310,36 +373,69 @@ function VariantsTab({
 }
 
 export function SetDetailPage({ setId }: { setId: string }) {
+  const searchParams = useSearchParams();
+  const queryJobId = searchParams.get("jobId");
+
   const [activeTab, setActiveTab] = React.useState<TabId>("questions");
   const [setInfo, setSetInfo] = React.useState<SetDetailResponse | null>(null);
-  const [questions, setQuestions] = React.useState<QuestionSummary[]>([]);
+  const [questions, setQuestions] = React.useState<ViewQuestionSummary[]>([]);
   const [selectedQId, setSelectedQId] = React.useState<string | null>(null);
-  const [selectedDetail, setSelectedDetail] = React.useState<QuestionDetailResponse | null>(null);
-  const [variantRows, setVariantRows] = React.useState<VariantRow[]>([]);
+  const [selectedDetail, setSelectedDetail] = React.useState<ViewQuestionDetail | null>(null);
+  const [variantRows, setVariantRows] = React.useState<VariantItem[]>([]);
   const [variantLoading, setVariantLoading] = React.useState(false);
   const [variantError, setVariantError] = React.useState<string | null>(null);
   const [reprocessing, setReprocessing] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
 
+  const [jobId, setJobId] = React.useState<string | null>(null);
+  const [jobInfo, setJobInfo] = React.useState<JobDetailResponse | null>(null);
+  const [jobEvents, setJobEvents] = React.useState<JobEventItem[]>([]);
+  const [jobError, setJobError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (queryJobId) {
+      setJobId(queryJobId);
+      try {
+        window.localStorage.setItem(`sedu:job:${setId}`, queryJobId);
+      } catch {
+        // Ignore private mode storage errors.
+      }
+      return;
+    }
+
+    try {
+      const stored = window.localStorage.getItem(`sedu:job:${setId}`);
+      if (stored) setJobId(stored);
+    } catch {
+      // no-op
+    }
+  }, [queryJobId, setId]);
+
   const fetchSetAndQuestions = React.useCallback(async () => {
     const [setData, listData] = await Promise.all([
-      getSet(setId) as Promise<SetDetailResponse>,
+      getSet(setId),
       listQuestionsForSet(setId) as Promise<QuestionListResponse>,
     ]);
 
     setSetInfo(setData);
-    setQuestions(listData.questions || []);
-
-    if (!selectedQId && listData.questions?.length) {
-      setSelectedQId(listData.questions[0].questionId);
-    } else if (
-      selectedQId &&
-      !listData.questions.some((q) => q.questionId === selectedQId)
-    ) {
-      setSelectedQId(listData.questions[0]?.questionId ?? null);
+    setQuestions((listData.questions || []) as ViewQuestionSummary[]);
+    if (!jobId && setData.latestJobId) {
+      setJobId(setData.latestJobId);
+      try {
+        window.localStorage.setItem(`sedu:job:${setId}`, setData.latestJobId);
+      } catch {
+        // no-op
+      }
     }
-  }, [setId, selectedQId]);
+
+    setSelectedQId((prev) => {
+      const items = listData.questions || [];
+      if (items.length === 0) return null;
+      if (!prev) return items[0].questionId;
+      return items.some((q) => q.questionId === prev) ? prev : items[0].questionId;
+    });
+  }, [setId, jobId]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -374,6 +470,57 @@ export function SetDetailPage({ setId }: { setId: string }) {
     return () => window.clearInterval(timer);
   }, [setInfo, fetchSetAndQuestions]);
 
+  const fetchJobTimeline = React.useCallback(async () => {
+    if (!jobId) return;
+    const [job, events] = await Promise.all([getJob(jobId), getJobEvents(jobId)]);
+    setJobInfo(job);
+    setJobEvents(events.events || []);
+  }, [jobId]);
+
+  React.useEffect(() => {
+    if (!jobId) {
+      setJobInfo(null);
+      setJobEvents([]);
+      setJobError(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        await fetchJobTimeline();
+        if (!cancelled) setJobError(null);
+      } catch (e) {
+        if (!cancelled) {
+          setJobError(e instanceof Error ? e.message : "Job 상태 조회 실패");
+        }
+      }
+    };
+
+    run().catch(() => {
+      // handled in run
+    });
+
+    const shouldPoll =
+      !jobInfo ||
+      ["queued", "running"].includes(jobInfo.status) ||
+      ["created", "extracting"].includes(setInfo?.status ?? "");
+
+    if (!shouldPoll) return;
+
+    const timer = window.setInterval(() => {
+      run().catch(() => {
+        // no-op
+      });
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [jobId, fetchJobTimeline, jobInfo, setInfo]);
+
   React.useEffect(() => {
     if (!selectedQId) {
       setSelectedDetail(null);
@@ -384,7 +531,7 @@ export function SetDetailPage({ setId }: { setId: string }) {
 
     (async () => {
       try {
-        const data = (await getQuestion(selectedQId)) as QuestionDetailResponse;
+        const data = (await getQuestion(selectedQId)) as ViewQuestionDetail;
         if (!cancelled) setSelectedDetail(data);
       } catch {
         if (!cancelled) setSelectedDetail(null);
@@ -397,9 +544,7 @@ export function SetDetailPage({ setId }: { setId: string }) {
   }, [selectedQId]);
 
   const fetchVariants = React.useCallback(async (questionId: string) => {
-    const res = await fetch(`${API_BASE}/v1/questions/${questionId}/variants`);
-    if (!res.ok) throw new Error(`변형문제 조회 실패 (${res.status})`);
-    const data = (await res.json()) as VariantListResponse;
+    const data = await listQuestionVariants(questionId);
     setVariantRows(data.variants || []);
   }, []);
 
@@ -418,12 +563,7 @@ export function SetDetailPage({ setId }: { setId: string }) {
     setVariantLoading(true);
     setVariantError(null);
     try {
-      const res = await fetch(`${API_BASE}/v1/questions/${selectedQId}/variants`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantType: "paraphrase" }),
-      });
-      if (!res.ok) throw new Error(`변형문제 생성 실패 (${res.status})`);
+      await createQuestionVariant(selectedQId, { variantType: "paraphrase" });
       await fetchVariants(selectedQId);
     } catch (e) {
       setVariantError(e instanceof Error ? e.message : "변형문제 생성 실패");
@@ -439,7 +579,7 @@ export function SetDetailPage({ setId }: { setId: string }) {
     try {
       await reprocessQuestion(selectedQId);
       await fetchSetAndQuestions();
-      const detail = (await getQuestion(selectedQId)) as QuestionDetailResponse;
+      const detail = (await getQuestion(selectedQId)) as ViewQuestionDetail;
       setSelectedDetail(detail);
     } catch (e) {
       setError(e instanceof Error ? e.message : "문항 재처리에 실패했습니다.");
@@ -474,7 +614,7 @@ export function SetDetailPage({ setId }: { setId: string }) {
       </header>
 
       <main className="py-12">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
           <h1 className="font-mono text-3xl font-bold sm:text-4xl">문제세트</h1>
           <span className="font-mono text-sm text-muted-foreground px-3 py-1 rounded-full bg-muted">
             {setId}
@@ -493,6 +633,8 @@ export function SetDetailPage({ setId }: { setId: string }) {
             </span>
           )}
         </div>
+
+        <JobTimelineCard jobId={jobId} job={jobInfo} events={jobEvents} error={jobError} />
 
         {error && (
           <p className="font-mono text-sm text-destructive mb-6">{error}</p>

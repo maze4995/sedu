@@ -1,5 +1,6 @@
-import { apiGet } from "@/lib/api/client";
+import { apiDelete, apiGet } from "@/lib/api/client";
 import type {
+  SetDeleteResponse,
   SetDetailResponse,
   SetListResponse,
   QuestionListResponse,
@@ -23,4 +24,8 @@ export async function getSet(setId: string): Promise<SetDetailResponse> {
 
 export async function listQuestionsForSet(setId: string): Promise<QuestionListResponse> {
   return apiGet<QuestionListResponse>(`/v2/sets/${setId}/questions`);
+}
+
+export async function deleteSet(setId: string): Promise<SetDeleteResponse> {
+  return apiDelete<SetDeleteResponse>(`/v2/sets/${setId}`);
 }

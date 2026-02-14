@@ -31,5 +31,5 @@ app.mount("/uploads", StaticFiles(directory=str(settings.upload_dir)), name="upl
 
 
 @app.get("/healthz", tags=["health"])
-def healthz() -> dict[str, str]:
+async def healthz() -> dict[str, str]:
     return {"ok": "true"}

@@ -8,13 +8,14 @@ import {
   FileText,
   FileUp,
   Loader2,
+  Trash2,
   Upload,
   XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createDocument, listSets } from "@/lib/api/v2";
+import { createDocument, deleteSet, listSets } from "@/lib/api/v2";
 
 type SetSummary = {
   setId: string;
@@ -48,10 +49,11 @@ export function DashboardPage() {
   const [file, setFile] = React.useState<File | null>(null);
   const [uploading, setUploading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [deletingSetId, setDeletingSetId] = React.useState<string | null>(null);
   const [mySets, setMySets] = React.useState<SetSummary[]>([]);
 
   const fetchRecentSets = React.useCallback(async () => {
-    const data = (await listSets({ limit: 5, offset: 0 })) as SetListResponse;
+    const data = (await listSets({ limit: 200, offset: 0 })) as SetListResponse;
     setMySets(data.sets || []);
   }, []);
 
@@ -83,10 +85,15 @@ export function DashboardPage() {
 
     try {
       const data = await createDocument(file);
+      try {
+        window.localStorage.setItem(`sedu:job:${data.setId}`, data.jobId);
+      } catch {
+        // Ignore storage errors in private mode.
+      }
       fetchRecentSets().catch(() => {
         // no-op
       });
-      router.push(`/sets/${data.setId}`);
+      router.push(`/sets/${data.setId}?jobId=${data.jobId}`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -94,6 +101,28 @@ export function DashboardPage() {
           : "알 수 없는 오류가 발생했습니다.",
       );
       setUploading(false);
+    }
+  };
+
+  const handleDeleteSet = async (set: SetSummary) => {
+    const label = set.title || set.sourceFilename || set.setId;
+    const confirmed = window.confirm(`'${label}' 문제세트를 삭제할까요? 이 작업은 되돌릴 수 없습니다.`);
+    if (!confirmed) return;
+
+    setDeletingSetId(set.setId);
+    setError(null);
+    try {
+      await deleteSet(set.setId);
+      setMySets((prev) => prev.filter((item) => item.setId !== set.setId));
+      try {
+        window.localStorage.removeItem(`sedu:job:${set.setId}`);
+      } catch {
+        // no-op
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "문제세트 삭제에 실패했습니다.");
+    } finally {
+      setDeletingSetId(null);
     }
   };
 
@@ -184,13 +213,13 @@ export function DashboardPage() {
           </section>
 
           {/* My Sets */}
-          <section className="border-2 p-8">
+          <section className="border-2 p-8 flex flex-col min-h-[620px]">
             <h2 className="font-mono text-xl font-bold mb-2">내 문제세트</h2>
             <p className="font-mono text-sm text-muted-foreground mb-6">
               생성된 문제세트를 확인하고 관리할 수 있습니다.
             </p>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 overflow-y-auto pr-1 max-h-[500px]">
               {mySets.map((set) => {
                 const config = statusConfig[set.status as keyof typeof statusConfig] || {
                   icon: FileText,
@@ -221,17 +250,37 @@ export function DashboardPage() {
                       </div>
                     </div>
 
-                    <Button
-                      asChild
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer rounded-none font-mono shrink-0"
-                    >
-                      <Link href={`/sets/${set.setId}`}>
-                        열기
-                        <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
-                      </Link>
-                    </Button>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="cursor-pointer rounded-none font-mono shrink-0"
+                      >
+                        <Link href={`/sets/${set.setId}`}>
+                          열기
+                          <ExternalLink className="ml-1.5 h-3.5 w-3.5" />
+                        </Link>
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="icon-sm"
+                        className="cursor-pointer rounded-none shrink-0"
+                        disabled={deletingSetId === set.setId}
+                        onClick={() => {
+                          handleDeleteSet(set).catch(() => {
+                            // handled in state
+                          });
+                        }}
+                        aria-label="문제세트 삭제"
+                      >
+                        {deletingSetId === set.setId ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 );
               })}

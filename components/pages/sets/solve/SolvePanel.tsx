@@ -11,6 +11,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { requestQuestionHint } from "@/lib/api/v2";
 
 /* ------------------------------------------------------------------ */
 /*  Types & Constants                                                   */
@@ -222,20 +223,11 @@ export function SolvePanel({ question }: { question: SolvePanelQuestion }) {
     setInput("");
 
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000"}/v1/questions/${question.questionId}/hint`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            level: "weak",
-            recentChat: nextMessages.map((m) => ({ role: m.role, text: m.text })),
-            strokeSummary: "",
-          }),
-        },
-      );
-      if (!res.ok) throw new Error(`힌트 생성 실패 (${res.status})`);
-      const data = (await res.json()) as { hint: string };
+      const data = await requestQuestionHint(question.questionId, {
+        level: "weak",
+        recentChat: nextMessages.map((m) => ({ role: m.role, text: m.text })),
+        strokeSummary: "",
+      });
       setMessages((prev) => [...prev, { role: "ai", text: data.hint || "힌트를 생성하지 못했습니다." }]);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "힌트 생성에 실패했습니다.";

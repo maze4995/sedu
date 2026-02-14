@@ -8,6 +8,7 @@ class QuestionDetailResponse(BaseModel):
     orderIndex: int
     reviewStatus: str
     confidence: float | None = None
+    croppedImageUrl: str | None = None
     ocrText: str | None = None
     metadata: dict = Field(default_factory=dict)
     structure: dict = Field(default_factory=dict)

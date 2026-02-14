@@ -9,6 +9,8 @@
     "/v2/sets/{setId}/questions",
     "/v2/questions/{questionId}",
     "/v2/questions/{questionId}/reprocess",
+    "/v2/questions/{questionId}/variants",
+    "/v2/questions/{questionId}/hint",
     "/v2/review/queue",
     "/v2/questions/{questionId}/review"
   ]

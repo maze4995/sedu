@@ -6,8 +6,8 @@ from typing import Any
 
 from sqlalchemy import delete, desc, select
 
-from app.domain.models import JobEventRecord, JobRecord, QuestionRecord, SetRecord
-from app.infra.db.models import JobEventRow, JobRow, QuestionRow, ReviewActionRow, SetRow
+from app.domain.models import JobEventRecord, JobRecord, QuestionRecord, SetRecord, VariantRecord
+from app.infra.db.models import JobEventRow, JobRow, QuestionRow, ReviewActionRow, SetRow, VariantRow
 from app.infra.db.session import get_session_factory
 
 
@@ -78,6 +78,20 @@ class DatabaseStore:
             metadata=dict(row.metadata_json or {}),
             structure=dict(row.structure_json or {}),
             ocr_text=row.ocr_text,
+        )
+
+    @staticmethod
+    def _to_variant_record(row: VariantRow, question_public_id: str) -> VariantRecord:
+        created_at = row.created_at.isoformat() if row.created_at else datetime.now(timezone.utc).isoformat()
+        return VariantRecord(
+            variant_id=row.public_id,
+            question_id=question_public_id,
+            variant_type=row.variant_type,
+            body=row.body,
+            answer=row.answer,
+            explanation=row.explanation,
+            model=row.model,
+            created_at=created_at,
         )
 
     def create_document(self, *, filename: str | None, mime: str | None, size: int | None) -> dict[str, str]:
@@ -231,6 +245,33 @@ class DatabaseStore:
                 return None
             return self._to_set_record(row)
 
+    def delete_set(self, set_id: str) -> bool:
+        with self._session_factory() as db:
+            row = db.execute(select(SetRow).where(SetRow.public_id == set_id)).scalar_one_or_none()
+            if row is None:
+                return False
+            db.delete(row)
+            db.commit()
+            return True
+
+    def get_latest_job_id_for_set(self, set_id: str) -> str | None:
+        with self._session_factory() as db:
+            row = db.execute(select(SetRow.id).where(SetRow.public_id == set_id)).scalar_one_or_none()
+            if row is None:
+                return None
+
+            job_public_id = (
+                db.execute(
+                    select(JobRow.public_id)
+                    .where(JobRow.set_id == row)
+                    .order_by(JobRow.created_at.desc(), JobRow.id.desc())
+                    .limit(1)
+                )
+                .scalars()
+                .first()
+            )
+            return job_public_id
+
     def list_sets(self, *, limit: int, offset: int, status: str | None = None) -> list[SetRecord]:
         with self._session_factory() as db:
             stmt = select(SetRow)
@@ -350,3 +391,49 @@ class DatabaseStore:
             db.refresh(question_row)
 
             return self._to_question_record(question_row, set_row.public_id)
+
+    def list_variants_for_question(self, question_id: str) -> list[VariantRecord]:
+        with self._session_factory() as db:
+            row = db.execute(select(QuestionRow).where(QuestionRow.public_id == question_id)).scalar_one_or_none()
+            if row is None:
+                return []
+
+            items = (
+                db.execute(
+                    select(VariantRow)
+                    .where(VariantRow.question_id == row.id)
+                    .order_by(VariantRow.created_at.desc(), VariantRow.id.desc())
+                )
+                .scalars()
+                .all()
+            )
+            return [self._to_variant_record(item, row.public_id) for item in items]
+
+    def create_variant_for_question(
+        self,
+        *,
+        question_id: str,
+        variant_type: str,
+        body: str,
+        answer: str | None,
+        explanation: str | None,
+        model: str | None,
+    ) -> VariantRecord | None:
+        with self._session_factory() as db:
+            row = db.execute(select(QuestionRow).where(QuestionRow.public_id == question_id)).scalar_one_or_none()
+            if row is None:
+                return None
+
+            variant_row = VariantRow(
+                public_id=self._new_id("var_"),
+                question_id=row.id,
+                variant_type=variant_type,
+                body=body,
+                answer=answer,
+                explanation=explanation,
+                model=model,
+            )
+            db.add(variant_row)
+            db.commit()
+            db.refresh(variant_row)
+            return self._to_variant_record(variant_row, row.public_id)

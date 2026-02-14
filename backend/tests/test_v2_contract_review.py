@@ -1,11 +1,10 @@
 import time
 
-from fastapi.testclient import TestClient
-
 from app.main import app
+from tests.http_client import SyncASGIClient
 
 
-def _create_set_and_question(client: TestClient) -> tuple[str, str]:
+def _create_set_and_question(client: SyncASGIClient) -> tuple[str, str]:
     files = {"file": ("sample.png", b"mock-image", "image/png")}
     created = client.post("/v2/documents", files=files).json()
     set_id = created["setId"]
@@ -23,7 +22,7 @@ def _create_set_and_question(client: TestClient) -> tuple[str, str]:
 
 
 def test_review_queue_and_patch_contract():
-    client = TestClient(app)
+    client = SyncASGIClient(app)
     _, question_id = _create_set_and_question(client)
 
     reprocess = client.post(f"/v2/questions/{question_id}/reprocess")

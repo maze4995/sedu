@@ -73,6 +73,7 @@ class QuestionRow(Base):
     review_actions: Mapped[list[ReviewActionRow]] = relationship(
         back_populates="question", cascade="all, delete-orphan"
     )
+    variants: Mapped[list[VariantRow]] = relationship(back_populates="question", cascade="all, delete-orphan")
 
 
 class ReviewActionRow(Base):
@@ -86,3 +87,19 @@ class ReviewActionRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     question: Mapped[QuestionRow] = relationship(back_populates="review_actions")
+
+
+class VariantRow(Base):
+    __tablename__ = "question_variants"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    public_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    question_id: Mapped[int] = mapped_column(ForeignKey("questions.id", ondelete="CASCADE"), index=True)
+    variant_type: Mapped[str] = mapped_column(String(64), index=True)
+    body: Mapped[str] = mapped_column(Text)
+    answer: Mapped[str | None] = mapped_column(Text)
+    explanation: Mapped[str | None] = mapped_column(Text)
+    model: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+
+    question: Mapped[QuestionRow] = relationship(back_populates="variants")

@@ -1,11 +1,10 @@
 import time
 
-from fastapi.testclient import TestClient
-
 from app.main import app
+from tests.http_client import SyncASGIClient
 
 
-def _wait_for_job_terminal(client: TestClient, job_id: str, timeout_seconds: float = 2.0) -> dict:
+def _wait_for_job_terminal(client: SyncASGIClient, job_id: str, timeout_seconds: float = 2.0) -> dict:
     deadline = time.time() + timeout_seconds
     latest: dict = {}
     while time.time() < deadline:
@@ -19,7 +18,7 @@ def _wait_for_job_terminal(client: TestClient, job_id: str, timeout_seconds: flo
 
 
 def test_create_document_contract_and_job_lookup():
-    client = TestClient(app)
+    client = SyncASGIClient(app)
 
     files = {"file": ("sample.pdf", b"%PDF-1.4 mock", "application/pdf")}
     resp = client.post("/v2/documents", files=files)

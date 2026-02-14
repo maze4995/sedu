@@ -59,3 +59,15 @@ class ReviewActionRecord:
     review_status: ReviewStatus
     note: str | None
     created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+
+@dataclass
+class VariantRecord:
+    variant_id: str
+    question_id: str
+    variant_type: str
+    body: str
+    answer: str | None
+    explanation: str | None
+    model: str | None
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())

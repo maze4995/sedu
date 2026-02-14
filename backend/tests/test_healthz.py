@@ -1,10 +1,9 @@
-from fastapi.testclient import TestClient
-
 from app.main import app
+from tests.http_client import SyncASGIClient
 
 
 def test_healthz_200():
-    client = TestClient(app)
+    client = SyncASGIClient(app)
     resp = client.get("/healthz")
 
     assert resp.status_code == 200

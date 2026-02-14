@@ -46,20 +46,20 @@ export function MynaHero() {
     <div className="container mx-auto px-4 min-h-screen bg-background">
       <header>
         <div className="flex h-16 items-center justify-between">
-          <a href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <div className="flex items-center space-x-2">
               <BrainCircuit className="h-8 w-8 text-[#FF6B2C]" />
               <span className="font-mono text-xl font-bold">SEDU</span>
             </div>
-          </a>
+          </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
             <a href="#features" className="text-sm font-mono text-foreground hover:text-[#FF6B2C] transition-colors">
               기능 소개
             </a>
-            <a href="/dashboard" className="text-sm font-mono text-foreground hover:text-[#FF6B2C] transition-colors">
+            <Link href="/dashboard" className="text-sm font-mono text-foreground hover:text-[#FF6B2C] transition-colors">
               대시보드
-            </a>
+            </Link>
           </nav>
         </div>
       </header>

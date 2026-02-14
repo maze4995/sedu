@@ -18,6 +18,7 @@ class SetListResponse(BaseModel):
 class SetDetailResponse(BaseModel):
     setId: str
     status: str
+    latestJobId: str | None = None
     title: str | None = None
     sourceFilename: str | None = None
     sourceMime: str | None = None
@@ -31,8 +32,14 @@ class SetQuestionSummary(BaseModel):
     orderIndex: int
     reviewStatus: str
     confidence: float | None = None
+    croppedImageUrl: str | None = None
 
 
 class SetQuestionListResponse(BaseModel):
     setId: str
     questions: list[SetQuestionSummary]
+
+
+class SetDeleteResponse(BaseModel):
+    ok: bool = True
+    setId: str
