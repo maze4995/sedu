@@ -53,3 +53,4 @@ __pycache__/
 backend/uploads/
 backend/debug/
 backend/credentials/
+backend/.env

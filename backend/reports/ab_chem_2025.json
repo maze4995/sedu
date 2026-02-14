@@ -1,0 +1,421 @@
+{
+  "input": {
+    "path": "C:\\Users\\rlgus\\Downloads\\2025 고2 화학 2학기 기말고사 도당고.pdf",
+    "filename": "2025 고2 화학 2학기 기말고사 도당고.pdf",
+    "contentType": "application/pdf",
+    "sizeBytes": 707838
+  },
+  "settings": {
+    "modeA": "hybrid",
+    "modeB": "gemini_full",
+    "ocrBackend": "vision",
+    "llmBackend": "gemini",
+    "ocrLang": "kor+eng",
+    "geminiModel": "gemini-2.5-flash"
+  },
+  "modeA": {
+    "metrics": {
+      "questionCount": 22,
+      "avgConfidence": 0.7455,
+      "emptyTextCount": 0,
+      "emptyTextRatio": 0.0,
+      "labeledCount": 22,
+      "labeledRatio": 1.0,
+      "uniqueLabelCount": 22,
+      "duplicateLabelCount": 0,
+      "monotonicNumberRatio": 0.9524,
+      "avgTextChars": 308.64,
+      "avgChoiceCount": 0.227,
+      "cropHintCoverage": 0.0,
+      "overlapViolations": 0,
+      "elapsedMs": 71529,
+      "engine": "google_vision_pdf+llm",
+      "sourceType": "pdf",
+      "rawTextChars": 8211
+    },
+    "questionsPreview": [
+      {
+        "orderIndex": 1,
+        "numberLabel": "1.",
+        "confidence": 0.8300000000000001,
+        "text": "1. 다음은 석회 동굴에 관련된 화학 반응식 (가)와 이 반응에 대한 설명이다.(가) CaCO3(s) + H2O(l) + CO2(g) ↔ Ca(HCO3)2 (aq)석회 동굴은 탄산 칼슘이 주성분인 석회암 지대에서 생성된다.㉠ 탄산 칼슘은 이산화 탄소와 지하수와 함께 반응하여 물에 잘 녹는 탄산수소칼슘을 생성하고, 탄산수소 칼슘 수용액에서 이산화 탄소가 빠져나가면서 다시 탄산칼슘이 생성된다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? [4.3점]<보기>ㄱ. ㉠은 (가)에서 역반응에 대한 설명이다.ㄴ. (가)에서 오른쪽으로 반응이 진행되면 종유석, 석순이 생성된다.ㄷ. (가)가 동적 평형 상태에 있을 때 탄산 칼슘의 석출 속도와 용해 속도는 같다.① ② ③ ④ ⑤",
+        "metadata": {
+          "subject": "unknown",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "source": "uploaded",
+          "engine": "google_vision_pdf+llm",
+          "sourceType": "pdf",
+          "questionType": "unknown",
+          "answerFormat": "unknown",
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash"
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "1. 다음은 석회 동굴에 관련된 화학 반응식 (가)와 이 반응에 대한 설명이다.(가) CaCO3(s) + H2O(l) + CO2(g) ↔ Ca(HCO3)2 (aq)석회 동굴은 탄산 칼슘이 주성분인 석회암 지대에서 생성된다.㉠ 탄산 칼슘은 이산화 탄소와 지하수와 함께 반응하여 물에 잘 녹는 탄산수소칼슘을 생성하고, 탄산수소 칼슘 수용액에서 이산화 탄소가 빠져나가면서 다시 탄산칼슘이 생성된다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? [4.3점]<보기>ㄱ. ㉠은 (가)에서 역반응에 대한 설명이다.ㄴ. (가)에서 오른쪽으로 반응이 진행되면 종유석, 석순이 생성된다.ㄷ. (가)가 동적 평형 상태에 있을 때 탄산 칼슘의 석출 속도와 용해 속도는 같다.① ② ③ ④ ⑤",
+            "choices": [
+              {
+                "label": "1",
+                "text": "다음은 석회 동굴에 관련된 화학 반응식 (가)와 이 반응에 대한 설명이다.(가) CaCO3(s) + H2O(l) + CO2(g) ↔ Ca(HCO3)2 (aq)석회 동굴은 탄산 칼슘이 주성분인 석회암 지대에서 생성된다.㉠ 탄산 칼슘은 이산화 탄소와 지하수와 함께 반응하여 물에 잘 녹는 탄산수소칼슘을 생성하고, 탄산수소 칼슘 수용액에서 이산화 탄소가 빠져나가면서 다시 탄산칼슘이 생성된다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? [4.3점]<보기>ㄱ. ㉠은 (가)에서 역반응에 대한 설명이다.ㄴ. (가)에서 오른쪽으로 반응이 진행되면 종유석, 석순이 생성된다.ㄷ. (가)가 동적 평형 상태에 있을 때 탄산 칼슘의 석출 속도와 용해 속도는 같다.① ② ③ ④ ⑤"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 2,
+        "numberLabel": "2.",
+        "confidence": 0.8200000000000001,
+        "text": "2. 물의 자동 이온화와 pH, pOH에 대한 설명으로 옳지 않은 것은? [4.4점]① 25℃에서 pH와 pOH의 합은 14이다.② 순수한 물에서 [H3O+]와 [OH-]는 같다.③ 수용액의 수소 이온 농도가 작을수록 pH는 크다.④ 수용액 속 수소 이온의 농도가 수산화 이온의 농도보다 크면 수용액의 액성은 산성이다.⑤ 순수한 물속에서 수소 이온의 농도와 수산화 이온의 농도의 곱을 물의 이온화 상수(Kw)라고 한다.",
+        "metadata": {
+          "subject": "unknown",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "source": "uploaded",
+          "engine": "google_vision_pdf+llm",
+          "sourceType": "pdf",
+          "questionType": "unknown",
+          "answerFormat": "unknown",
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash"
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "2. 물의 자동 이온화와 pH, pOH에 대한 설명으로 옳지 않은 것은? [4.4점]① 25℃에서 pH와 pOH의 합은 14이다.② 순수한 물에서 [H3O+]와 [OH-]는 같다.③ 수용액의 수소 이온 농도가 작을수록 pH는 크다.④ 수용액 속 수소 이온의 농도가 수산화 이온의 농도보다 크면 수용액의 액성은 산성이다.⑤ 순수한 물속에서 수소 이온의 농도와 수산화 이온의 농도의 곱을 물의 이온화 상수(Kw)라고 한다.",
+            "choices": [
+              {
+                "label": "1",
+                "text": "물의 자동 이온화와 pH, pOH에 대한 설명으로 옳지 않은 것은? [4.4점]① 25℃에서 pH와 pOH의 합은 14이다.② 순수한 물에서 [H3O+]와 [OH-]는 같다.③ 수용액의 수소 이온 농도가 작을수록 pH는 크다.④ 수용액 속 수소 이온의 농도가 수산화 이온의 농도보다 크면 수용액의 액성은 산성이다.⑤ 순수한 물속에서 수소 이온의 농도와 수산화 이온의 농도의 곱을 물의 이온화 상수(Kw)라고 한다."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 3,
+        "numberLabel": "3.",
+        "confidence": 0.81,
+        "text": "3. 그림은 물의 자동 이온화 반응을 모형으로 나타낸 것이다. 25℃에서 물의 이온화 상수(Kw)는 1×10-14 이다.H2O + H2O ↔ H3O+ + (가)25℃에서 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, (가)는 하이드로늄 이온과 수산화 이온 중 하나이다.) [4.4점]<보기>ㄱ. 물 10-4 L에 들어 있는 (가)의 양은 1mol이다.ㄴ. 0.2 M NaOH(aq)에서 [H3O+]는 1×10-14보다 크다.ㄷ. 물의 자동 이온화 반응에서 생성물의 양(mol)은 반응물의 양(mol)보다 매우 작다.① ② ③ ④ ⑤",
+        "metadata": {
+          "subject": "unknown",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "source": "uploaded",
+          "engine": "google_vision_pdf+llm",
+          "sourceType": "pdf",
+          "questionType": "unknown",
+          "answerFormat": "unknown",
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash"
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "3. 그림은 물의 자동 이온화 반응을 모형으로 나타낸 것이다. 25℃에서 물의 이온화 상수(Kw)는 1×10-14 이다.H2O + H2O ↔ H3O+ + (가)25℃에서 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, (가)는 하이드로늄 이온과 수산화 이온 중 하나이다.) [4.4점]<보기>ㄱ. 물 10-4 L에 들어 있는 (가)의 양은 1mol이다.ㄴ. 0.2 M NaOH(aq)에서 [H3O+]는 1×10-14보다 크다.ㄷ. 물의 자동 이온화 반응에서 생성물의 양(mol)은 반응물의 양(mol)보다 매우 작다.① ② ③ ④ ⑤",
+            "choices": [
+              {
+                "label": "1",
+                "text": "그림은 물의 자동 이온화 반응을 모형으로 나타낸 것이다. 25℃에서 물의 이온화 상수(Kw)는 1×10-14 이다.H2O + H2O ↔ H3O+ + (가)25℃에서 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, (가)는 하이드로늄 이온과 수산화 이온 중 하나이다.) [4.4점]<보기>ㄱ. 물 10-4 L에 들어 있는 (가)의 양은 1mol이다.ㄴ. 0.2 M NaOH(aq)에서 [H3O+]는 1×10-14보다 크다.ㄷ. 물의 자동 이온화 반응에서 생성물의 양(mol)은 반응물의 양(mol)보다 매우 작다.① ② ③ ④ ⑤"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 4,
+        "numberLabel": "4.",
+        "confidence": 0.8,
+        "text": "4. 그림 (가)는 진공 용기 속에 H2O(l)을 넣고 충분한 시간이 흐른 후 평형에 도달한 모습을, (나)는 시간에 따른 H2O(l)의 증발 속도와 H2O(g)의 응축(응결) 속도를 나타낸 것이다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 온도는 일정하다.) [4.3점]<보기>ㄱ. ㉠은 H2O(l)의 증발 속도이다.ㄴ. H2O의 상변화는 가역 반응이다.ㄷ. 용기 속 H2O(l)의 양은 t3일 때가 t2일 때보다 많다.① ㄱ② ㄷ③ ㄱ, ㄴ④ ㄴ, ㄷ⑤ ㄱ, ㄴ, ㄷ",
+        "metadata": {
+          "subject": "unknown",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "source": "uploaded",
+          "engine": "google_vision_pdf+llm",
+          "sourceType": "pdf",
+          "questionType": "unknown",
+          "answerFormat": "unknown",
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash"
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "4. 그림 (가)는 진공 용기 속에 H2O(l)을 넣고 충분한 시간이 흐른 후 평형에 도달한 모습을, (나)는 시간에 따른 H2O(l)의 증발 속도와 H2O(g)의 응축(응결) 속도를 나타낸 것이다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 온도는 일정하다.) [4.3점]<보기>ㄱ. ㉠은 H2O(l)의 증발 속도이다.ㄴ. H2O의 상변화는 가역 반응이다.ㄷ. 용기 속 H2O(l)의 양은 t3일 때가 t2일 때보다 많다.① ㄱ② ㄷ③ ㄱ, ㄴ④ ㄴ, ㄷ⑤ ㄱ, ㄴ, ㄷ",
+            "choices": [
+              {
+                "label": "1",
+                "text": "그림 (가)는 진공 용기 속에 H2O(l)을 넣고 충분한 시간이 흐른 후 평형에 도달한 모습을, (나)는 시간에 따른 H2O(l)의 증발 속도와 H2O(g)의 응축(응결) 속도를 나타낸 것이다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 온도는 일정하다.) [4.3점]<보기>ㄱ. ㉠은 H2O(l)의 증발 속도이다.ㄴ. H2O의 상변화는 가역 반응이다.ㄷ. 용기 속 H2O(l)의 양은 t3일 때가 t2일 때보다 많다.① ㄱ② ㄷ③ ㄱ, ㄴ④ ㄴ, ㄷ⑤ ㄱ, ㄴ, ㄷ"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 5,
+        "numberLabel": "5.",
+        "confidence": 0.79,
+        "text": "5. 그림은 aM NaOH(aq) 10mL에 산성 수용액 (가)와 (나)를 순서대로 넣었을 때, 혼합 용액 속 OH-의 양(mol)을 넣어 준 산성 수용액의 부피에 따라 나타낸 것이다. (가), (나)는 각각 0.1 M HX (aq)과 0.1 M H2Y(aq) 중 하나이다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 수용액에서 HX는 H+과 X-으로, H2Y는 H+과 Y2-으로 모두 이온화하고, X-, Y2-은 반응하지 않으며, 물의 자동 이온화는 무시한다.) [4.7점]<보기>ㄱ. (가)는 H2Y이다.ㄴ. n=0.002이다.ㄷ. aV=20이다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄱ, ㄴ, ㄷ",
+        "metadata": {
+          "subject": "unknown",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "source": "uploaded",
+          "engine": "google_vision_pdf+llm",
+          "sourceType": "pdf",
+          "questionType": "unknown",
+          "answerFormat": "unknown",
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash"
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "5. 그림은 aM NaOH(aq) 10mL에 산성 수용액 (가)와 (나)를 순서대로 넣었을 때, 혼합 용액 속 OH-의 양(mol)을 넣어 준 산성 수용액의 부피에 따라 나타낸 것이다. (가), (나)는 각각 0.1 M HX (aq)과 0.1 M H2Y(aq) 중 하나이다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 수용액에서 HX는 H+과 X-으로, H2Y는 H+과 Y2-으로 모두 이온화하고, X-, Y2-은 반응하지 않으며, 물의 자동 이온화는 무시한다.) [4.7점]<보기>ㄱ. (가)는 H2Y이다.ㄴ. n=0.002이다.ㄷ. aV=20이다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄱ, ㄴ, ㄷ",
+            "choices": [
+              {
+                "label": "1",
+                "text": "그림은 aM NaOH(aq) 10mL에 산성 수용액 (가)와 (나)를 순서대로 넣었을 때, 혼합 용액 속 OH-의 양(mol)을 넣어 준 산성 수용액의 부피에 따라 나타낸 것이다. (가), (나)는 각각 0.1 M HX (aq)과 0.1 M H2Y(aq) 중 하나이다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 수용액에서 HX는 H+과 X-으로, H2Y는 H+과 Y2-으로 모두 이온화하고, X-, Y2-은 반응하지 않으며, 물의 자동 이온화는 무시한다.) [4.7점]<보기>ㄱ. (가)는 H2Y이다.ㄴ. n=0.002이다.ㄷ. aV=20이다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄱ, ㄴ, ㄷ"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "modeB": {
+    "metrics": {
+      "questionCount": 25,
+      "avgConfidence": 0.98,
+      "emptyTextCount": 0,
+      "emptyTextRatio": 0.0,
+      "labeledCount": 25,
+      "labeledRatio": 1.0,
+      "uniqueLabelCount": 25,
+      "duplicateLabelCount": 0,
+      "monotonicNumberRatio": 0.8333,
+      "avgTextChars": 282.28,
+      "avgChoiceCount": 0.2,
+      "cropHintCoverage": 1.0,
+      "overlapViolations": 0,
+      "elapsedMs": 105666,
+      "engine": "gemini_vision_pages",
+      "sourceType": "pdf",
+      "rawTextChars": 7105
+    },
+    "questionsPreview": [
+      {
+        "orderIndex": 1,
+        "numberLabel": "1.",
+        "confidence": 1.0,
+        "text": "1. 다음은 석회 동굴에 관련된 화학 반응식 (가)와 이 반응에 대한 설명이다.(가) CaCO₃(s) + H₂O(l) + CO₂(g) ⇌ Ca(HCO₃)₂(aq)석회 동굴은 탄산 칼슘이 주성분인 석회암 지대에서 생성된다. ㉠ 탄산 칼슘은 이산화 탄소와 지하수와 함께 반응하여 물에 잘 녹는 탄산수소 칼슘을 생성하고, 탄산수소 칼슘 수용액에서 이산화 탄소가 빠져나가면서 다시 탄산칼슘이 생성된다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? [4.3점]<보기>ㄱ. ㉠은 (가)에서 역반응에 대한 설명이다.ㄴ. (가)에서 오른쪽으로 반응이 진행되면 종유석, 석순아 생성된다.ㄷ. (가)가 동적 평형 상태에 있을 때 탄산 칼슘의 석출 속도와 용해 속도는 같다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄴ, ㄷ",
+        "metadata": {
+          "subject": "Chemistry",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "questionType": "multiple choice",
+          "answerFormat": "multiple choice",
+          "source": "uploaded",
+          "engine": "gemini_vision",
+          "sourceType": "pdf",
+          "pageIndex": 1,
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash",
+          "cropHint": {
+            "pageIndex": 1,
+            "topRatio": 0.2125,
+            "bottomRatio": 0.675,
+            "leftRatio": 0.0416,
+            "rightRatio": 0.4916
+          }
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "1. 다음은 석회 동굴에 관련된 화학 반응식 (가)와 이 반응에 대한 설명이다.(가) CaCO₃(s) + H₂O(l) + CO₂(g) ⇌ Ca(HCO₃)₂(aq)석회 동굴은 탄산 칼슘이 주성분인 석회암 지대에서 생성된다. ㉠ 탄산 칼슘은 이산화 탄소와 지하수와 함께 반응하여 물에 잘 녹는 탄산수소 칼슘을 생성하고, 탄산수소 칼슘 수용액에서 이산화 탄소가 빠져나가면서 다시 탄산칼슘이 생성된다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? [4.3점]<보기>ㄱ. ㉠은 (가)에서 역반응에 대한 설명이다.ㄴ. (가)에서 오른쪽으로 반응이 진행되면 종유석, 석순아 생성된다.ㄷ. (가)가 동적 평형 상태에 있을 때 탄산 칼슘의 석출 속도와 용해 속도는 같다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄴ, ㄷ",
+            "choices": [
+              {
+                "label": "1",
+                "text": "다음은 석회 동굴에 관련된 화학 반응식 (가)와 이 반응에 대한 설명이다.(가) CaCO₃(s) + H₂O(l) + CO₂(g) ⇌ Ca(HCO₃)₂(aq)석회 동굴은 탄산 칼슘이 주성분인 석회암 지대에서 생성된다. ㉠ 탄산 칼슘은 이산화 탄소와 지하수와 함께 반응하여 물에 잘 녹는 탄산수소 칼슘을 생성하고, 탄산수소 칼슘 수용액에서 이산화 탄소가 빠져나가면서 다시 탄산칼슘이 생성된다.이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? [4.3점]<보기>ㄱ. ㉠은 (가)에서 역반응에 대한 설명이다.ㄴ. (가)에서 오른쪽으로 반응이 진행되면 종유석, 석순아 생성된다.ㄷ. (가)가 동적 평형 상태에 있을 때 탄산 칼슘의 석출 속도와 용해 속도는 같다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄴ, ㄷ"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 2,
+        "numberLabel": "2.",
+        "confidence": 1.0,
+        "text": "2. 물의 자동 이온화와 pH, pOH에 대한 설명으로 옳지 않은 것은? [4.4점]① 25℃에서 pH와 pOH의 합은 14이다.② 순수한 물에서 [H₃O⁺]와 [OH⁻]는 같다.③ 수용액의 수소 이온 농도가 클수록 pH는 크다.④ 수용액 속 수소 이온의 농도가 수산화 이온의 농도보다 크면 수용액의 액성은 산성이다.⑤ 순수한 물속에서 수소 이온의 농도와 수산화 이온의 농도의 곱을 물의 이온화 상수(K_w)라고 한다.",
+        "metadata": {
+          "subject": "Chemistry",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "questionType": "multiple choice",
+          "answerFormat": "multiple choice",
+          "source": "uploaded",
+          "engine": "gemini_vision",
+          "sourceType": "pdf",
+          "pageIndex": 1,
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash",
+          "cropHint": {
+            "pageIndex": 1,
+            "topRatio": 0.71875,
+            "bottomRatio": 0.9125,
+            "leftRatio": 0.0416,
+            "rightRatio": 0.4916
+          }
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "2. 물의 자동 이온화와 pH, pOH에 대한 설명으로 옳지 않은 것은? [4.4점]① 25℃에서 pH와 pOH의 합은 14이다.② 순수한 물에서 [H₃O⁺]와 [OH⁻]는 같다.③ 수용액의 수소 이온 농도가 클수록 pH는 크다.④ 수용액 속 수소 이온의 농도가 수산화 이온의 농도보다 크면 수용액의 액성은 산성이다.⑤ 순수한 물속에서 수소 이온의 농도와 수산화 이온의 농도의 곱을 물의 이온화 상수(K_w)라고 한다.",
+            "choices": [
+              {
+                "label": "1",
+                "text": "물의 자동 이온화와 pH, pOH에 대한 설명으로 옳지 않은 것은? [4.4점]① 25℃에서 pH와 pOH의 합은 14이다.② 순수한 물에서 [H₃O⁺]와 [OH⁻]는 같다.③ 수용액의 수소 이온 농도가 클수록 pH는 크다.④ 수용액 속 수소 이온의 농도가 수산화 이온의 농도보다 크면 수용액의 액성은 산성이다.⑤ 순수한 물속에서 수소 이온의 농도와 수산화 이온의 농도의 곱을 물의 이온화 상수(K_w)라고 한다."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 3,
+        "numberLabel": "3.",
+        "confidence": 1.0,
+        "text": "3. 그림은 물의 자동 이온화 반응을 모형으로 나타낸 것이다. 25℃에서 물의 이온화 상수(K_w)는 1×10⁻¹⁴이다.H₂O + H₂O ⇌ H₃O⁺ + OH⁻(가)25℃에서 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, (가)는 하이드로늄 이온과 수산화 이온 중 하나이다.) [4.4점]<보기>ㄱ. 물 10¹⁴ L에 들어 있는 (가)의 양은 1 mol이다.ㄴ. 0.2M NaOH(aq)에서 [H₃O⁺][OH⁻]는 1×10⁻¹⁴보다 크다.ㄷ. 물의 자동 이온화 반응에서 생성물의 양(mol)은 반응물의 양(mol)보다 매우 작다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄴ, ㄷ",
+        "metadata": {
+          "subject": "Chemistry",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "questionType": "multiple choice",
+          "answerFormat": "multiple choice",
+          "source": "uploaded",
+          "engine": "gemini_vision",
+          "sourceType": "pdf",
+          "pageIndex": 1,
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash",
+          "cropHint": {
+            "pageIndex": 1,
+            "topRatio": 0.15,
+            "bottomRatio": 0.5,
+            "leftRatio": 0.5083,
+            "rightRatio": 0.9583
+          }
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "3. 그림은 물의 자동 이온화 반응을 모형으로 나타낸 것이다. 25℃에서 물의 이온화 상수(K_w)는 1×10⁻¹⁴이다.H₂O + H₂O ⇌ H₃O⁺ + OH⁻(가)25℃에서 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, (가)는 하이드로늄 이온과 수산화 이온 중 하나이다.) [4.4점]<보기>ㄱ. 물 10¹⁴ L에 들어 있는 (가)의 양은 1 mol이다.ㄴ. 0.2M NaOH(aq)에서 [H₃O⁺][OH⁻]는 1×10⁻¹⁴보다 크다.ㄷ. 물의 자동 이온화 반응에서 생성물의 양(mol)은 반응물의 양(mol)보다 매우 작다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄴ, ㄷ",
+            "choices": [
+              {
+                "label": "1",
+                "text": "그림은 물의 자동 이온화 반응을 모형으로 나타낸 것이다. 25℃에서 물의 이온화 상수(K_w)는 1×10⁻¹⁴이다.H₂O + H₂O ⇌ H₃O⁺ + OH⁻(가)25℃에서 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, (가)는 하이드로늄 이온과 수산화 이온 중 하나이다.) [4.4점]<보기>ㄱ. 물 10¹⁴ L에 들어 있는 (가)의 양은 1 mol이다.ㄴ. 0.2M NaOH(aq)에서 [H₃O⁺][OH⁻]는 1×10⁻¹⁴보다 크다.ㄷ. 물의 자동 이온화 반응에서 생성물의 양(mol)은 반응물의 양(mol)보다 매우 작다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄴ, ㄷ"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 4,
+        "numberLabel": "4.",
+        "confidence": 1.0,
+        "text": "4. 그림 (가)는 진공 용기 속에 H₂O(l)을 넣고 충분한 시간이 흐른 후 평형에 도달한 모습을, (나)는 시간에 따른 H₂O(l)의 증발 속도와 H₂O(g)의 응축(응결) 속도를 나타낸 것이다.H₂O(g)H₂O(l)속도0t₁t₂시간(가)(나)이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 온도는 일정하다.) [4.3점]<보기>ㄱ. ㉠은 H₂O(l)의 증발 속도이다.ㄴ. H₂O의 상변화는 가역 반응이다.ㄷ. 용기 속 H₂O(l)의 양은 t₁일 때가 t₂일 때보다 많다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄱ, ㄴ, ㄷ",
+        "metadata": {
+          "subject": "Chemistry",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "questionType": "multiple choice",
+          "answerFormat": "multiple choice",
+          "source": "uploaded",
+          "engine": "gemini_vision",
+          "sourceType": "pdf",
+          "pageIndex": 1,
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash",
+          "cropHint": {
+            "pageIndex": 1,
+            "topRatio": 0.525,
+            "bottomRatio": 0.8875,
+            "leftRatio": 0.5083,
+            "rightRatio": 0.9583
+          }
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "4. 그림 (가)는 진공 용기 속에 H₂O(l)을 넣고 충분한 시간이 흐른 후 평형에 도달한 모습을, (나)는 시간에 따른 H₂O(l)의 증발 속도와 H₂O(g)의 응축(응결) 속도를 나타낸 것이다.H₂O(g)H₂O(l)속도0t₁t₂시간(가)(나)이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 온도는 일정하다.) [4.3점]<보기>ㄱ. ㉠은 H₂O(l)의 증발 속도이다.ㄴ. H₂O의 상변화는 가역 반응이다.ㄷ. 용기 속 H₂O(l)의 양은 t₁일 때가 t₂일 때보다 많다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄱ, ㄴ, ㄷ",
+            "choices": [
+              {
+                "label": "1",
+                "text": "그림 (가)는 진공 용기 속에 H₂O(l)을 넣고 충분한 시간이 흐른 후 평형에 도달한 모습을, (나)는 시간에 따른 H₂O(l)의 증발 속도와 H₂O(g)의 응축(응결) 속도를 나타낸 것이다.H₂O(g)H₂O(l)속도0t₁t₂시간(가)(나)이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 온도는 일정하다.) [4.3점]<보기>ㄱ. ㉠은 H₂O(l)의 증발 속도이다.ㄴ. H₂O의 상변화는 가역 반응이다.ㄷ. 용기 속 H₂O(l)의 양은 t₁일 때가 t₂일 때보다 많다.① ㄱ② ㄴ③ ㄷ④ ㄱ, ㄴ⑤ ㄱ, ㄴ, ㄷ"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "orderIndex": 5,
+        "numberLabel": "5.",
+        "confidence": 1.0,
+        "text": "5. 그림은 aM NaOH(aq) 10mL에 산성 수용액 (가)와 (나)를 순서대로 넣었을 때, 혼합 용액 속 OH⁻의 양(mol)을 넣어 준 산성 수용액의 부피에 따라 나타낸 것이다. (가), (나)는 각각 0.1M HX(aq)와 0.1M H₂Y(aq) 중 하나이다. 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 수용액에서 HX는 H⁺과 X⁻으로, H₂Y는 H⁺과 Y²⁻으로 모두 이온화하고, X⁻, Y²⁻은 반응하지 않으며, 물의 자동 이온화는 무시한다.) [4.7점] <보기> ㄱ. (가)는 H₂Y이다. ㄴ. n = 0.002이다. ㄷ. a × V = 10이다. ① ㄱ ② ㄴ ③ ㄷ ④ ㄱ, ㄴ ⑤ ㄱ, ㄴ, ㄷ",
+        "metadata": {
+          "subject": "화학",
+          "unit": "unknown",
+          "difficulty": "unknown",
+          "questionType": "multiple choice",
+          "answerFormat": "multiple choice",
+          "source": "uploaded",
+          "engine": "gemini_vision",
+          "sourceType": "pdf",
+          "pageIndex": 2,
+          "llmRefined": true,
+          "llmModel": "gemini-2.5-flash",
+          "cropHint": {
+            "pageIndex": 2,
+            "topRatio": 0.07,
+            "bottomRatio": 0.595,
+            "leftRatio": 0.04,
+            "rightRatio": 0.49
+          }
+        },
+        "structure": {
+          "parsed_v1": {
+            "stem": "5. 그림은 aM NaOH(aq) 10mL에 산성 수용액 (가)와 (나)를 순서대로 넣었을 때, 혼합 용액 속 OH⁻의 양(mol)을 넣어 준 산성 수용액의 부피에 따라 나타낸 것이다. (가), (나)는 각각 0.1M HX(aq)와 0.1M H₂Y(aq) 중 하나이다. 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 수용액에서 HX는 H⁺과 X⁻으로, H₂Y는 H⁺과 Y²⁻으로 모두 이온화하고, X⁻, Y²⁻은 반응하지 않으며, 물의 자동 이온화는 무시한다.) [4.7점] <보기> ㄱ. (가)는 H₂Y이다. ㄴ. n = 0.002이다. ㄷ. a × V = 10이다. ① ㄱ ② ㄴ ③ ㄷ ④ ㄱ, ㄴ ⑤ ㄱ, ㄴ, ㄷ",
+            "choices": [
+              {
+                "label": "1",
+                "text": "그림은 aM NaOH(aq) 10mL에 산성 수용액 (가)와 (나)를 순서대로 넣었을 때, 혼합 용액 속 OH⁻의 양(mol)을 넣어 준 산성 수용액의 부피에 따라 나타낸 것이다. (가), (나)는 각각 0.1M HX(aq)와 0.1M H₂Y(aq) 중 하나이다. 이에 대한 설명으로 옳은 것만을 <보기>에서 있는 대로 고른 것은? (단, 수용액에서 HX는 H⁺과 X⁻으로, H₂Y는 H⁺과 Y²⁻으로 모두 이온화하고, X⁻, Y²⁻은 반응하지 않으며, 물의 자동 이온화는 무시한다.) [4.7점] <보기> ㄱ. (가)는 H₂Y이다. ㄴ. n = 0.002이다. ㄷ. a × V = 10이다. ① ㄱ ② ㄴ ③ ㄷ ④ ㄱ, ㄴ ⑤ ㄱ, ㄴ, ㄷ"
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "countDelta": -3,
+    "labelIntersectionCount": 20,
+    "labelUnionCount": 27,
+    "labelJaccard": 0.7407,
+    "avgTextSimilarityOnMatchedLabels": 0.8156,
+    "matchedLabelsPreview": [
+      "1.",
+      "2.",
+      "3.",
+      "4.",
+      "5.",
+      "6.",
+      "7.",
+      "8.",
+      "9.",
+      "10.",
+      "11.",
+      "12.",
+      "13.",
+      "14.",
+      "15.",
+      "16.",
+      "17.",
+      "18.",
+      "19.",
+      "20."
+    ]
+  }
+}
